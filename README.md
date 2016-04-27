@@ -1,2 +1,2 @@
-# eclipse_planolux_p1
-Prueba GitHub Planolux P1 Board
+# eclipse_dexel_lcd_v12
+BKP Dexel LCD Board v1.2
