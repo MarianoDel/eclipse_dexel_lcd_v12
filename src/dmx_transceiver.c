@@ -11,7 +11,7 @@
 #include "stm32f0x_uart.h"
 #include "stm32f0x_gpio.h"
 
-#include "rdm_util.h"
+
 
 //--- VARIABLES EXTERNAS ---//
 extern volatile unsigned char RDM_packet_flag;

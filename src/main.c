@@ -66,7 +66,6 @@
 #include "dmx_transceiver.h"
 #include "standalone.h"
 #include "grouped.h"
-#include "networked.h"
 
 //--- VARIABLES EXTERNAS ---//
 volatile unsigned char timer_1seg = 0;
@@ -147,14 +146,6 @@ Grouped_Typedef const GroupedStruct_constant =
 				//parte slave
 				.grouped_mode = GROUPED_MODE_SLAVE,
 				.grouped_dmx_channel = GROUPED_INITIAL_CHANNEL
-
-		};
-
-Networked_Typedef const NetworkedStruct_constant =
-//Networked_Typedef __attribute__ ((section("memParams2"))) const NetworkedStruct_constant =
-		{
-				//parte slave,
-				.networked_dmx_channel = NETWORKED_INITIAL_CHANNEL
 
 		};
 
@@ -295,7 +286,7 @@ int main(void)
 
 	//TIM Configuration.
 	TIM_3_Init();
-	TIM_14_Init();
+	TIM_14_Init();			//lo uso para detectar el break en el DMX
 	//TIM_16_Init();		//para OneShoot() cuando funciona en modo master
 	//TIM_17_Init();		//lo uso para el ADC de Igrid
 
@@ -313,7 +304,7 @@ int main(void)
 	Wait_ms(100);
 	CTRL_BKL_ON;
 
-	while (FuncShowBlink ((const char *) "Kirno Technology", (const char *) "  Smart Driver  ", 2, BLINK_NO) != RESP_FINISH);
+	while (FuncShowBlink ((const char *) "Kirno Technology", (const char *) "Smart Controller", 2, BLINK_NO) != RESP_FINISH);
 	LED_OFF;
 	while (FuncShowBlink ((const char *) "Hardware: V1.2  ", (const char *) "Software: V2.0  ", 1, BLINK_CROSS) != RESP_FINISH);
 
@@ -561,15 +552,14 @@ int main(void)
 				break;
 
 			case MAIN_DMX:
-				/*
-				//resp = FuncStandAlone();
+				//resp = FuncManual();
 
 				if (resp == RESP_CHANGE_ALL_UP)
 				{
-					FuncStandAloneReset();
+//					FuncManualReset();
 					main_state = MAIN_INIT;
 				}
-				*/
+
 				break;
 
 			case MAIN_MANUAL:
