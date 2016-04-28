@@ -20,7 +20,7 @@ extern volatile unsigned short scroll1_timer;
 extern volatile unsigned short scroll2_timer;
 
 /* Global variables ------------------------------------------------------------*/
-unsigned char mainmenu_state = 0;
+enum var_mainmenu_states mainmenu_state = MAINMENU_INIT;
 unsigned char mainmenu_repeat = 0;
 unsigned char show_select_state = 0;
 unsigned char options_state = 0;
@@ -50,7 +50,7 @@ const unsigned char s_sel_up_down [] = { 0x02, 0x08, 0x0f };
 //devuelve nueva selección o estado anterior
 unsigned char FuncMainMenu (void)
 {
-	unsigned char resp = MAINMENU_CONTINUE;
+	unsigned char resp = RESP_CONTINUE;
 	unsigned char resp_down = 0;
 
 	switch (mainmenu_state)
@@ -59,145 +59,125 @@ unsigned char FuncMainMenu (void)
 			resp_down = FuncShowBlink ((const char *) "    Entering    ", (const char *) "   Main Menu    ", 3, BLINK_DIRECT);
 
 			if (resp_down == RESP_FINISH)
-				mainmenu_state = MAINMENU_SHOW_STANDALONE;
+				mainmenu_state = MAINMENU_SHOW_MANUAL;
 			break;
 
-		case MAINMENU_INIT_1:
-			/*
-			LCD_1ER_RENGLON;
-			LCDTransmitStr((const char *) "    Entering    ");
-			LCD_2DO_RENGLON;
-			LCDTransmitStr((const char *) "   Main Menu    ");
-			mainmenu_timer = 500;
-			mainmenu_state++;
-			*/
-			break;
+		case MAINMENU_SHOW_MANUAL:
+			resp_down = FuncShowSelectv2((const char *) "  MANUAL DIMMER ");
 
-		case MAINMENU_INIT_2:
-			/*
-			if (!mainmenu_timer)
-			{
-				LCD_1ER_RENGLON;
-				LCDTransmitStr(s_blank_line);
-				LCD_2DO_RENGLON;
-				LCDTransmitStr(s_blank_line);
-				mainmenu_timer = 500;
-				mainmenu_state++;
-			}
-			*/
-			break;
+			if (resp_down == RESP_CHANGE_DWN)
+				mainmenu_state = MAINMENU_SHOW_BRD_DIAG;
 
-		case MAINMENU_INIT_3:
-			/*
-			if (!mainmenu_timer)
-			{
-				if (mainmenu_repeat)
-				{
-					mainmenu_repeat--;
-					mainmenu_state = MAINMENU_INIT_1;
-				}
-				else
-					mainmenu_state = MAINMENU_SHOW_STANDALONE;
-			}
-			*/
-			break;
-
-		case MAINMENU_SHOW_STANDALONE:
-			resp_down = FuncShowSelectv2((const char *) "Stand Alone     ");
-
-			if (resp_down == RESP_CHANGE)
-				mainmenu_state = MAINMENU_SHOW_GROUPED;
+			if (resp_down == RESP_CHANGE_UP)
+				mainmenu_state = MAINMENU_SHOW_DMX;
 
 			if (resp_down == RESP_SELECTED)
-				mainmenu_state = MAINMENU_SHOW_STANDALONE_SELECTED;
+				mainmenu_state = MAINMENU_SHOW_MANUAL_SELECTED;
 
 			if (resp_down == RESP_CHANGE_ALL_UP)
 				mainmenu_state = MAINMENU_INIT;
 
 			break;
 
-		case MAINMENU_SHOW_GROUPED:
-			resp_down = FuncShowSelectv2((const char *) "Grouped         ");
+		case MAINMENU_SHOW_DMX:
+			resp_down = FuncShowSelectv2((const char *) "   DMX DIMMER   ");
 
-			if (resp_down == RESP_CHANGE)
-				mainmenu_state = MAINMENU_SHOW_NETWORK;
+			if (resp_down == RESP_CHANGE_DWN)
+				mainmenu_state = MAINMENU_SHOW_MANUAL;
+
+			if (resp_down == RESP_CHANGE_UP)
+				mainmenu_state = MAINMENU_SHOW_COLORS;
 
 			if (resp_down == RESP_SELECTED)
-				mainmenu_state = MAINMENU_SHOW_GROUPED_SELECTED;
+				mainmenu_state = MAINMENU_SHOW_DMX_SELECTED;
 
 			if (resp_down == RESP_CHANGE_ALL_UP)
 				mainmenu_state = MAINMENU_INIT;
 
 			break;
 
-		case MAINMENU_SHOW_NETWORK:
-			resp_down = FuncShowSelectv2((const char *) "Network         ");
+		case MAINMENU_SHOW_COLORS:
+			resp_down = FuncShowSelectv2((const char *) "   SET COLORS   ");
 
-			if (resp_down == RESP_CHANGE)
-				mainmenu_state = MAINMENU_SHOW_STANDALONE;
+			if (resp_down == RESP_CHANGE_DWN)
+				mainmenu_state = MAINMENU_SHOW_DMX;
+
+			if (resp_down == RESP_CHANGE_UP)
+				mainmenu_state = MAINMENU_SHOW_BRD_DIAG;
 
 			if (resp_down == RESP_SELECTED)
-				mainmenu_state = MAINMENU_SHOW_NETWORK_SELECTED;
+				mainmenu_state = MAINMENU_SHOW_COLORS_SELECTED;
 
 			if (resp_down == RESP_CHANGE_ALL_UP)
 				mainmenu_state = MAINMENU_INIT;
 
 			break;
 
+		case MAINMENU_SHOW_BRD_DIAG:
+			resp_down = FuncShowSelectv2((const char *) "Brd Diagnostics ");
 
-		case MAINMENU_SHOW_STANDALONE_SELECTED:
-			FuncShowBlink ((const char *) "Stand Alone     ", (const char *) "Selected...     ", 0, BLINK_NO);
-			/*
-			LCD_1ER_RENGLON;
-			LCDTransmitStr((const char *) "Stand Alone     ");
-			LCD_2DO_RENGLON;
-			LCDTransmitStr((const char *) "Selected...     ");
-			*/
+			if (resp_down == RESP_CHANGE_DWN)
+				mainmenu_state = MAINMENU_SHOW_COLORS;
+
+			if (resp_down == RESP_CHANGE_UP)
+				mainmenu_state = MAINMENU_SHOW_MANUAL;
+
+			if (resp_down == RESP_SELECTED)
+				mainmenu_state = MAINMENU_SHOW_BRD_DIAG_SELECTED;
+
+			if (resp_down == RESP_CHANGE_ALL_UP)
+				mainmenu_state = MAINMENU_INIT;
+
+			break;
+
+		case MAINMENU_SHOW_MANUAL_SELECTED:
+			FuncShowBlink ((const char *) "Manual Mode     ", (const char *) "Selected...     ", 0, BLINK_NO);
 			mainmenu_state++;
 			break;
 
-		case MAINMENU_SHOW_STANDALONE_SELECTED_1:
-			if (CheckS2() == S_NO)
+		case MAINMENU_SHOW_MANUAL_SELECTED_1:
+			if (CheckSSel() == S_NO)
 			{
-				resp = MAINMENU_SHOW_STANDALONE_SELECTED;
+				resp = MAINMENU_SHOW_MANUAL_SELECTED;
 				mainmenu_state = MAINMENU_INIT;
 			}
 			break;
 
-		case MAINMENU_SHOW_GROUPED_SELECTED:
-			FuncShowBlink ((const char *) "Grouped         ", (const char *) "Selected...     ", 0, BLINK_NO);
-			/*
-			LCD_1ER_RENGLON;
-			LCDTransmitStr((const char *) "Grouped         ");
-			LCD_2DO_RENGLON;
-			LCDTransmitStr((const char *) "Selected...     ");
-			*/
+		case MAINMENU_SHOW_DMX_SELECTED:
+			FuncShowBlink ((const char *) "DMX Mode        ", (const char *) "Selected...     ", 0, BLINK_NO);
 			mainmenu_state++;
 			break;
 
-		case MAINMENU_SHOW_GROUPED_SELECTED_1:
-			if (CheckS2() == S_NO)
+		case MAINMENU_SHOW_DMX_SELECTED_1:
+			if (CheckSSel() == S_NO)
 			{
-				resp = MAINMENU_SHOW_GROUPED_SELECTED;
+				resp = MAINMENU_SHOW_DMX_SELECTED;
 				mainmenu_state = MAINMENU_INIT;
 			}
 			break;
 
-		case MAINMENU_SHOW_NETWORK_SELECTED:
-			FuncShowBlink ((const char *) "Networked       ", (const char *) "Selected...     ", 0, BLINK_NO);
-			/*
-			LCD_1ER_RENGLON;
-			LCDTransmitStr((const char *) "Networked       ");
-			LCD_2DO_RENGLON;
-			LCDTransmitStr((const char *) "Selected...     ");
-			*/
+		case MAINMENU_SHOW_COLORS_SELECTED:
+			FuncShowBlink ((const char *) "Color Temp. Mode", (const char *) "Selected...     ", 0, BLINK_NO);
 			mainmenu_state++;
 			break;
 
-		case MAINMENU_SHOW_NETWORK_SELECTED_1:
-			if (CheckS2() == S_NO)
+		case MAINMENU_SHOW_COLORS_SELECTED_1:
+			if (CheckSSel() == S_NO)
 			{
-				resp = MAINMENU_SHOW_NETWORK_SELECTED;
+				resp = MAINMENU_SHOW_COLORS_SELECTED;
+				mainmenu_state = MAINMENU_INIT;
+			}
+			break;
+
+		case MAINMENU_SHOW_BRD_DIAG_SELECTED:
+			FuncShowBlink ((const char *) "Brd Diagnostics ", (const char *) "Selected...     ", 0, BLINK_NO);
+			mainmenu_state++;
+			break;
+
+		case MAINMENU_SHOW_BRD_DIAG_SELECTED_1:
+			if (CheckSSel() == S_NO)
+			{
+				resp = MAINMENU_SHOW_COLORS_SELECTED;
 				mainmenu_state = MAINMENU_INIT;
 			}
 			break;
@@ -356,11 +336,14 @@ unsigned char FuncShowSelect (const char * p_text)
 				show_select_state++;
 			}
 
-			//check s1 y s2
-			if (CheckS1() > S_NO)
-				show_select_state = SHOW_SELECT_CHANGE;
+			//check s_down, s_up y s_sel
+			if (CheckSDown() > S_NO)
+				show_select_state = SHOW_SELECT_CHANGE_DWN;
 
-			if (CheckS2() > S_NO)
+			if (CheckSUp() > S_NO)
+				show_select_state = SHOW_SELECT_CHANGE_UP;
+
+			if (CheckSSel() > S_NO)
 				show_select_state = SHOW_SELECT_SELECTED;
 
 			break;
@@ -371,11 +354,14 @@ unsigned char FuncShowSelect (const char * p_text)
 				show_select_state = SHOW_SELECT_1;
 			}
 
-			//check s1 y s2
-			if (CheckS1() > S_NO)
-				show_select_state = SHOW_SELECT_CHANGE;
+			//check s_down, s_up y s_sel
+			if (CheckSDown() > S_NO)
+				show_select_state = SHOW_SELECT_CHANGE_DWN;
 
-			if (CheckS2() > S_NO)
+			if (CheckSUp() > S_NO)
+				show_select_state = SHOW_SELECT_CHANGE_UP;
+
+			if (CheckSSel() > S_NO)
 				show_select_state = SHOW_SELECT_SELECTED;
 
 			break;
@@ -389,29 +375,51 @@ unsigned char FuncShowSelect (const char * p_text)
 			break;
 
 		case SHOW_SELECT_SELECTED_1:
-			if (CheckS2() == S_NO)
+			if (CheckSSel() == S_NO)
 			{
 				resp = RESP_SELECTED;
 				show_select_state = SHOW_SELECT_INIT;
 			}
 			break;
 
-		case SHOW_SELECT_CHANGE:
+		case SHOW_SELECT_CHANGE_DWN:
 			LCD_1ER_RENGLON;
 			LCDTransmitStr(p_text);
 			LCD_2DO_RENGLON;
-			LCDTransmitStr((const char *) "Changing...     ");
+			LCDTransmitStr((const char *) "Changing Down...");
 			show_select_state++;
 			break;
 
-		case SHOW_SELECT_CHANGE_1:
-			if (CheckS1() == S_NO)
+		case SHOW_SELECT_CHANGE_DWN_1:
+			if (CheckSDown() == S_NO)
 			{
-				resp = RESP_CHANGE;
+				resp = RESP_CHANGE_DWN;
 				show_select_state = SHOW_SELECT_INIT;
 			}
 
-			if (CheckS1() > S_HALF)
+			if (CheckSDown() > S_HALF)
+			{
+				resp = RESP_CHANGE_ALL_UP;
+				show_select_state = SHOW_SELECT_INIT;
+			}
+			break;
+
+		case SHOW_SELECT_CHANGE_UP:
+			LCD_1ER_RENGLON;
+			LCDTransmitStr(p_text);
+			LCD_2DO_RENGLON;
+			LCDTransmitStr((const char *) "Changing Up...  ");
+			show_select_state++;
+			break;
+
+		case SHOW_SELECT_CHANGE_UP_1:
+			if (CheckSUp() == S_NO)
+			{
+				resp = RESP_CHANGE_UP;
+				show_select_state = SHOW_SELECT_INIT;
+			}
+
+			if (CheckSUp() > S_HALF)
 			{
 				resp = RESP_CHANGE_ALL_UP;
 				show_select_state = SHOW_SELECT_INIT;
@@ -441,7 +449,7 @@ unsigned char FuncShowSelectv2 (const char * p_text)
 	{
 		case SHOW_SELECT_INIT:
 			LCD_2DO_RENGLON;
-			LCDTransmitStr((const char *) "Cont.     Select");
+			LCDTransmitStr((const char *) "B1:- B2:+ B3:SEL");
 			show_select_state++;
 			break;
 
@@ -461,11 +469,14 @@ unsigned char FuncShowSelectv2 (const char * p_text)
 				show_select_state++;
 			}
 
-			//check s1 y s2
-			if (CheckS1() > S_NO)
-				show_select_state = SHOW_SELECT_CHANGE;
+			//check s_down, s_up y s_sel
+			if (CheckSDown() > S_NO)
+				show_select_state = SHOW_SELECT_CHANGE_DWN;
 
-			if (CheckS2() > S_NO)
+			if (CheckSUp() > S_NO)
+				show_select_state = SHOW_SELECT_CHANGE_UP;
+
+			if (CheckSSel() > S_NO)
 				show_select_state = SHOW_SELECT_SELECTED;
 
 			break;
@@ -476,11 +487,14 @@ unsigned char FuncShowSelectv2 (const char * p_text)
 				show_select_state = SHOW_SELECT_1;
 			}
 
-			//check s1 y s2
-			if (CheckS1() > S_NO)
-				show_select_state = SHOW_SELECT_CHANGE;
+			//check s_down, s_up y s_sel
+			if (CheckSDown() > S_NO)
+				show_select_state = SHOW_SELECT_CHANGE_DWN;
 
-			if (CheckS2() > S_NO)
+			if (CheckSUp() > S_NO)
+				show_select_state = SHOW_SELECT_CHANGE_UP;
+
+			if (CheckSSel() > S_NO)
 				show_select_state = SHOW_SELECT_SELECTED;
 
 			break;
@@ -494,29 +508,51 @@ unsigned char FuncShowSelectv2 (const char * p_text)
 			break;
 
 		case SHOW_SELECT_SELECTED_1:
-			if (CheckS2() == S_NO)
+			if (CheckSSel() == S_NO)
 			{
 				resp = RESP_SELECTED;
 				show_select_state = SHOW_SELECT_INIT;
 			}
 			break;
 
-		case SHOW_SELECT_CHANGE:
+		case SHOW_SELECT_CHANGE_DWN:
 			LCD_1ER_RENGLON;
 			LCDTransmitStr(p_text);
 			LCD_2DO_RENGLON;
-			LCDTransmitStr((const char *) "Changing...     ");
+			LCDTransmitStr((const char *) "Changing Down...");
 			show_select_state++;
 			break;
 
-		case SHOW_SELECT_CHANGE_1:
-			if (CheckS1() == S_NO)
+		case SHOW_SELECT_CHANGE_DWN_1:
+			if (CheckSDown() == S_NO)
 			{
-				resp = RESP_CHANGE;
+				resp = RESP_CHANGE_DWN;
 				show_select_state = SHOW_SELECT_INIT;
 			}
 
-			if (CheckS1() > S_HALF)
+			if (CheckSDown() > S_HALF)
+			{
+				resp = RESP_CHANGE_ALL_UP;
+				show_select_state = SHOW_SELECT_INIT;
+			}
+			break;
+
+		case SHOW_SELECT_CHANGE_UP:
+			LCD_1ER_RENGLON;
+			LCDTransmitStr(p_text);
+			LCD_2DO_RENGLON;
+			LCDTransmitStr((const char *) "Changing Up...  ");
+			show_select_state++;
+			break;
+
+		case SHOW_SELECT_CHANGE_UP_1:
+			if (CheckSUp() == S_NO)
+			{
+				resp = RESP_CHANGE_UP;
+				show_select_state = SHOW_SELECT_INIT;
+			}
+
+			if (CheckSUp() > S_HALF)
 			{
 				resp = RESP_CHANGE_ALL_UP;
 				show_select_state = SHOW_SELECT_INIT;

@@ -107,10 +107,11 @@ volatile unsigned short timer_fan_freerun = 0;
 volatile unsigned short scroll1_timer = 0;
 volatile unsigned short scroll2_timer = 0;
 
-volatile unsigned short standalone_timer;
-volatile unsigned short standalone_enable_menu_timer;
+volatile unsigned short function_timer;
+volatile unsigned short function_enable_menu_timer;
+
 //volatile unsigned short standalone_menu_timer;
-volatile unsigned char grouped_master_timeout_timer;
+//volatile unsigned char grouped_master_timeout_timer;
 volatile unsigned short take_temp_sample = 0;
 volatile unsigned short take_led_temp_sample = 0;
 volatile unsigned short minutes = 0;
@@ -157,10 +158,7 @@ Networked_Typedef const NetworkedStruct_constant =
 
 		};
 
-unsigned char saved_mode;
 
-// ------- para determinar igrid -------
-volatile unsigned char igrid_timer = 0;
 
 // ------- del display LCD -------
 const char s_blank_line [] = {"                "};
@@ -189,8 +187,6 @@ volatile unsigned char filter_timer;
 volatile unsigned short secs = 0;
 
 
-// ------- del display -------
-unsigned char v_opt [10];
 
 
 // ------- del DMX -------
@@ -215,8 +211,8 @@ unsigned char vd4 [LARGO_F + 1];
 
 //--- FUNCIONES DEL MODULO ---//
 void TimingDelay_Decrement(void);
-void Update_PWM (unsigned short);
 void UpdatePackets (void);
+
 // ------- del display -------
 
 
@@ -252,6 +248,7 @@ int main(void)
 	unsigned short local_meas_led_last = 0;
 	short one_int, one_dec;
 	char s_lcd [20];
+	enum var_main_states main_state = MAIN_INIT;
 
 
 #ifdef WITH_GRANDMASTER
@@ -300,7 +297,7 @@ int main(void)
 	TIM_3_Init();
 	TIM_14_Init();
 	//TIM_16_Init();		//para OneShoot() cuando funciona en modo master
-	TIM_17_Init();		//lo uso para el ADC de Igrid
+	//TIM_17_Init();		//lo uso para el ADC de Igrid
 
 	//--- PRUEBA DISPLAY LCD ---
 	EXTIOff ();
@@ -318,6 +315,7 @@ int main(void)
 
 	while (FuncShowBlink ((const char *) "Kirno Technology", (const char *) "  Smart Driver  ", 2, BLINK_NO) != RESP_FINISH);
 	LED_OFF;
+	while (FuncShowBlink ((const char *) "Hardware: V1.2  ", (const char *) "Software: V2.0  ", 1, BLINK_CROSS) != RESP_FINISH);
 
 	//DE PRODUCCION Y PARA PRUEBAS EN DMX
 	Packet_Detected_Flag = 0;
@@ -520,8 +518,114 @@ int main(void)
 	*/
 	//--- FIN PRUEBA CH0 DMX
 
+	//---------- Comienza Programa de PRODUCCION --------//
+
+	//leo la memoria, si tengo configuracion de modo
+	//entro directo, sino a Main Menu
+
+	while (FuncShowBlink ((const char *) "Checking Memory ", s_blank_line, 1, BLINK_NO) != RESP_FINISH);
+
+//	if (saved_mode == 0xFF)	//memoria borrada
+//	{
+		while (FuncShowBlink ((const char *) "  Memory Empty  ", s_blank_line, 1, BLINK_NO) != RESP_FINISH);
+		main_state = MAIN_INIT;
+//	}
+//	else
+		//TODO: aca deberia revisar a que estado debo entrar en forma directa!!!!!!
+//		main_state = MAIN_INIT;
+
+
+
+	while (1)
+	{
+		switch (main_state)
+		{
+			case MAIN_INIT:
+				resp = FuncMainMenu();
+
+				if (resp == MAINMENU_SHOW_MANUAL_SELECTED)
+				{
+					main_state = MAIN_MANUAL;
+					function_enable_menu_timer = TT_MENU_ENABLE;
+				}
+
+				if (resp == MAINMENU_SHOW_DMX_SELECTED)
+					main_state = MAIN_DMX;
+
+				if (resp == MAINMENU_SHOW_COLORS_SELECTED)
+					main_state = MAIN_COLORS;
+
+				if (resp == MAINMENU_SHOW_BRD_DIAG_SELECTED)
+					main_state = MAIN_BRD_DIAG;
+
+				break;
+
+			case MAIN_DMX:
+				/*
+				//resp = FuncStandAlone();
+
+				if (resp == RESP_CHANGE_ALL_UP)
+				{
+					FuncStandAloneReset();
+					main_state = MAIN_INIT;
+				}
+				*/
+				break;
+
+			case MAIN_MANUAL:
+				/*
+				resp = FuncGrouped();
+
+				if (resp == RESP_CHANGE_ALL_UP)
+				{
+					FuncGroupedReset();
+					main_state = MAIN_INIT;
+				}
+				*/
+				break;
+
+			case MAIN_COLORS:
+				/*
+				resp = FuncNetworked(jump_the_menu);
+				jump_the_menu = RESP_NO_CHANGE;
+				main_state++;
+				*/
+				break;
+
+			/*
+			case MAIN_NETWORKED_1:
+				resp = FuncNetworked(jump_the_menu);
+
+				if (resp == RESP_CHANGE_ALL_UP)
+					main_state = MAIN_INIT;
+
+				break;
+			*/
+
+			case MAIN_BRD_DIAG:
+				/*
+				resp = FuncNetworked(jump_the_menu);
+				jump_the_menu = RESP_NO_CHANGE;
+				main_state++;
+				*/
+				break;
+
+			default:
+				main_state = MAIN_INIT;
+				break;
+
+		}
+
+		UpdateSwitches();
+		UpdatePackets();
+
+	}	//termina while(1)
+
+	//---------- Fin Programa de PRODUCCION --------//
+
 	return 0;
 }
+//--- End of Main ---//
 
 void UpdatePackets (void)
 {
@@ -536,13 +640,6 @@ void UpdatePackets (void)
 		Packet_Detected_Flag = 0;
 	}
 }
-//--- End of Main ---//
-void Update_PWM (unsigned short pwm)
-{
-	Update_TIM3_CH1 (pwm);
-	Update_TIM3_CH2 (4095 - pwm);
-}
-
 
 unsigned short Get_Temp (void)
 {
@@ -722,9 +819,7 @@ void TimingDelay_Decrement(void)
 	if (filter_timer)
 		filter_timer--;
 
-	if (grouped_master_timeout_timer)
-		grouped_master_timeout_timer--;
-
+	//-------- Timers para funciones de seleccion ---------//
 	if (show_select_timer)
 		show_select_timer--;
 
@@ -734,14 +829,15 @@ void TimingDelay_Decrement(void)
 	if (scroll2_timer)
 		scroll2_timer--;
 
-	if (standalone_timer)
-		standalone_timer--;
+	//-------- Timers para funciones y sus menues ---------//
+	if (function_timer)
+		function_timer--;
 
 //	if (standalone_menu_timer)
 //		standalone_menu_timer--;
 
-	if (standalone_enable_menu_timer)
-		standalone_enable_menu_timer--;
+	if (function_enable_menu_timer)
+		function_enable_menu_timer--;
 
 /*
 	//cuenta de a 1 minuto

@@ -93,13 +93,16 @@
 
 
 //ESTADOS DEL PROGRAMA PRINCIPAL
-#define MAIN_INIT				0
+//estados del MAIN MENU
+enum var_main_states
+{
+	MAIN_INIT = 0,
+	MAIN_DMX,
+	MAIN_MANUAL,
+	MAIN_COLORS,
+	MAIN_BRD_DIAG
+};
 
-#define MAIN_STAND_ALONE		10
-#define MAIN_GROUPED			11
-#define MAIN_NETWORKED			12
-#define MAIN_NETWORKED_1		13
-#define MAIN_IN_MAIN_MENU		14
 
 //---- Temperaturas en el LM335
 //37	2,572
@@ -125,26 +128,23 @@
 #define SWITCHES_THRESHOLD_HALF	100		//1 segundo
 #define SWITCHES_THRESHOLD_MIN	5		//50 ms
 
-#define AC_SWITCH_THRESHOLD_ROOF	255		//techo del integrador
-#define AC_SWITCH_THRESHOLD_FULL	136		//3 segundos
-#define AC_SWITCH_THRESHOLD_HALF	45		//1 segundo
-#define AC_SWITCH_THRESHOLD_MIN		2		//50 ms
-
+//----- Definiciones para timers ------
 #define TTIMER_FOR_CAT_DISPLAY			2000	//tiempo entre que dice canal y el numero
 #define TIMER_STANDBY_TIMEOUT_REDUCED	2000	//reduced 2 segs
 #define TIMER_STANDBY_TIMEOUT			6000	//6 segundos
 #define DMX_DISPLAY_SHOW_TIMEOUT		30000	//30 segundos
+#define TT_MENU_ENABLE					30000	//30 segundos
 
 #define S_FULL		10
 #define S_HALF		3
 #define S_MIN		1
 #define S_NO		0
 
-#define FUNCTION_DMX	1
-#define FUNCTION_MAN	2
-#define FUNCTION_CAT	FUNCTION_MAN
+//#define FUNCTION_DMX	1
+//#define FUNCTION_MAN	2
+//#define FUNCTION_CAT	FUNCTION_MAN
 
-//----- Definiciones para l FAN ------
+//----- Definiciones para el FAN ------
 #define TIMER_FAN_ROOF	600
 #define FAN_SPEED_LOW	200
 #define FAN_SPEED_MED	400

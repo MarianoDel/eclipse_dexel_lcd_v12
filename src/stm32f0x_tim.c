@@ -224,7 +224,7 @@ void OneShootTIM16 (unsigned short a)
 
 void TIM17_IRQHandler (void)	//200uS
 {
-	igrid_timer = 1;
+//	igrid_timer = 1;
 
 	if (TIM17->SR & 0x01)
 		TIM17->SR = 0x00;		//bajar flag
