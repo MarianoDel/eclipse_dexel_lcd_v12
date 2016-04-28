@@ -133,7 +133,7 @@ enum var_main_states
 #define TIMER_STANDBY_TIMEOUT_REDUCED	2000	//reduced 2 segs
 #define TIMER_STANDBY_TIMEOUT			6000	//6 segundos
 #define DMX_DISPLAY_SHOW_TIMEOUT		30000	//30 segundos
-#define TT_MENU_ENABLE					30000	//30 segundos
+#define TT_MENU_ENABLED					30000	//30 segundos
 
 #define S_FULL		10
 #define S_HALF		3

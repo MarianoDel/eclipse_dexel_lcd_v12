@@ -64,8 +64,9 @@
 #include "main_menu.h"
 #include "synchro.h"
 #include "dmx_transceiver.h"
+#include "funcs_manual.h"
+
 #include "standalone.h"
-#include "grouped.h"
 
 //--- VARIABLES EXTERNAS ---//
 volatile unsigned char timer_1seg = 0;
@@ -109,6 +110,8 @@ volatile unsigned short scroll2_timer = 0;
 volatile unsigned short function_timer;
 volatile unsigned short function_enable_menu_timer;
 
+volatile unsigned short lcd_backlight_timer = 0;
+
 //volatile unsigned short standalone_menu_timer;
 //volatile unsigned char grouped_master_timeout_timer;
 volatile unsigned short take_temp_sample = 0;
@@ -130,29 +133,10 @@ StandAlone_Typedef const StandAloneStruct_constant =
 				.dimming_up_timer_value = 3000
 		};
 
-Grouped_Typedef const GroupedStruct_constant =
-//Grouped_Typedef __attribute__ ((section("memParams1"))) const GroupedStruct_constant =
-		{
-				//parte master igual a StandAlone
-				.move_sensor_enable = 1,
-				.ldr_enable = 0,
-				.ldr_value = 100,
-				.max_dimmer_value_percent = 100,
-				.max_dimmer_value_dmx = 255,
-				.min_dimmer_value_percent = 1,
-				.min_dimmer_value_dmx = MIN_DIMMING,
-				.power_up_timer_value = 3000,
-				.dimming_up_timer_value = 3000,
-				//parte slave
-				.grouped_mode = GROUPED_MODE_SLAVE,
-				.grouped_dmx_channel = GROUPED_INITIAL_CHANNEL
-
-		};
-
-
 
 // ------- del display LCD -------
 const char s_blank_line [] = {"                "};
+
 
 // ------- Externals de los switches -------
 unsigned short sdown;
@@ -537,7 +521,7 @@ int main(void)
 				if (resp == MAINMENU_SHOW_MANUAL_SELECTED)
 				{
 					main_state = MAIN_MANUAL;
-					function_enable_menu_timer = TT_MENU_ENABLE;
+					function_enable_menu_timer = TT_MENU_ENABLED;
 				}
 
 				if (resp == MAINMENU_SHOW_DMX_SELECTED)
@@ -563,15 +547,13 @@ int main(void)
 				break;
 
 			case MAIN_MANUAL:
-				/*
-				resp = FuncGrouped();
 
+				resp = FuncManual();
 				if (resp == RESP_CHANGE_ALL_UP)
 				{
-					FuncGroupedReset();
+					FuncManualReset();
 					main_state = MAIN_INIT;
 				}
-				*/
 				break;
 
 			case MAIN_COLORS:
@@ -808,6 +790,9 @@ void TimingDelay_Decrement(void)
 
 	if (filter_timer)
 		filter_timer--;
+
+	if (lcd_backlight_timer)
+		lcd_backlight_timer--;
 
 	//-------- Timers para funciones de seleccion ---------//
 	if (show_select_timer)

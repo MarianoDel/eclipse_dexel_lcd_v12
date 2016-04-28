@@ -4,6 +4,8 @@
 
 //--- LCD Configurations ---//
 
+
+
 #define PINS_DEFINED_IN_HARD
 #define WITH_STATE_MACHINE		//rutinas SM hay que ir llamando a un callback
 									//y se envia desde un buffer con interrupcion

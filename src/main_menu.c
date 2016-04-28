@@ -19,6 +19,8 @@ extern volatile unsigned short show_select_timer;
 extern volatile unsigned short scroll1_timer;
 extern volatile unsigned short scroll2_timer;
 
+extern const char s_blank_line [];
+
 /* Global variables ------------------------------------------------------------*/
 enum var_mainmenu_states mainmenu_state = MAINMENU_INIT;
 unsigned char mainmenu_repeat = 0;
@@ -40,8 +42,6 @@ unsigned char blinking_how_many = 0;
 unsigned char change_state = 0;
 unsigned char change_current_val = 0;
 unsigned char change_last_option = 0;
-
-extern const char * s_blank_line [];
 
 const unsigned char s_sel_up_down [] = { 0x02, 0x08, 0x0f };
 //-------- Functions -------------

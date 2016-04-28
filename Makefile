@@ -114,7 +114,7 @@ SRC += .\src\synchro.c
 SRC += .\src\dmx_transceiver.c
 SRC += .\src\hard.c
 SRC += .\src\main_menu.c
-#SRC += .\src\standalone.c
+SRC += .\src\funcs_manual.c
 #SRC += .\src\grouped.c
 #SRC += .\src\networked.c
 ## RDM libraries
