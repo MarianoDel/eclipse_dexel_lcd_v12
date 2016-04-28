@@ -11,6 +11,7 @@
 #include "main_menu.h"
 #include "dmx_transceiver.h"
 #include "lcd.h"
+#include "stm32f0xx.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -63,11 +64,38 @@ unsigned char FuncManual (void)
 			DMX_Disa();
 			MenuManualReset();
 			manual_state = MANUAL_UPDATE;
+			RELAY1_OFF;
+			RELAY2_OFF;
 			break;
 
 		case MANUAL_UPDATE:		//es un paso adelante, toda la info ya esta en memoria updated
 			if (manual_selections == MENU_OFF)
+			{
 				manual_state++;
+
+				if (ConfStruct_local.manual_relays_usage == 1)
+				{
+					if (ConfStruct_local.manual_ch1_value >= RELAY_START)
+						RELAY1_ON;
+					else if (ConfStruct_local.manual_ch1_value <= RELAY_STOP)
+						RELAY1_OFF;
+
+					if (ConfStruct_local.manual_ch2_value >= RELAY_START)
+						RELAY2_ON;
+					else if (ConfStruct_local.manual_ch2_value <= RELAY_STOP)
+						RELAY2_OFF;
+
+				}
+				else
+				{
+					RELAY1_OFF;
+					RELAY2_OFF;
+				}
+
+				Update_TIM3_CH1 (ConfStruct_local.manual_ch1_value);
+				Update_TIM3_CH2 (ConfStruct_local.manual_ch2_value);
+
+			}
 
 			break;
 
@@ -84,8 +112,9 @@ unsigned char FuncManual (void)
 			//check s_down, s_up y s_sel
 			if (CheckSDown() > S_NO)
 			{
-				if (ConfStruct_local.manual_ch1_value > 0)
+				if ((ConfStruct_local.manual_ch1_value > 0) && (!manual_timer))
 				{
+					manual_timer = TT_UPDATE_BUTTON;
 					ConfStruct_local.manual_ch1_value--;
 
 					Update_TIM3_CH1 (ConfStruct_local.manual_ch1_value);
@@ -95,8 +124,9 @@ unsigned char FuncManual (void)
 
 			if (CheckSUp() > S_NO)
 			{
-				if (ConfStruct_local.manual_ch1_value < 255)
+				if ((ConfStruct_local.manual_ch1_value < 255) && (!manual_timer))
 				{
+					manual_timer = TT_UPDATE_BUTTON;
 					ConfStruct_local.manual_ch1_value++;
 
 					Update_TIM3_CH1 (ConfStruct_local.manual_ch1_value);
@@ -117,6 +147,14 @@ unsigned char FuncManual (void)
 				sprintf(s_lcd, "%3d.%01d", one_int, one_dec);
 				Lcd_SetDDRAM(0x40 + 7);
 				LCDTransmitStr(s_lcd);
+
+				if (ConfStruct_local.manual_relays_usage == 1)
+				{
+					if (ConfStruct_local.manual_ch1_value >= RELAY_START)
+						RELAY1_ON;
+					else if (ConfStruct_local.manual_ch1_value <= RELAY_STOP)
+						RELAY1_OFF;
+				}
 			}
 
 
@@ -178,8 +216,9 @@ unsigned char FuncManual (void)
 			//check s_down, s_up y s_sel
 			if (CheckSDown() > S_NO)
 			{
-				if (ConfStruct_local.manual_ch2_value > 0)
+				if ((ConfStruct_local.manual_ch2_value > 0) && (!manual_timer))
 				{
+					manual_timer = TT_UPDATE_BUTTON;
 					ConfStruct_local.manual_ch2_value--;
 
 					Update_TIM3_CH2 (ConfStruct_local.manual_ch2_value);
@@ -189,8 +228,9 @@ unsigned char FuncManual (void)
 
 			if (CheckSUp() > S_NO)
 			{
-				if (ConfStruct_local.manual_ch2_value < 255)
+				if ((ConfStruct_local.manual_ch2_value < 255) && (!manual_timer))
 				{
+					manual_timer = TT_UPDATE_BUTTON;
 					ConfStruct_local.manual_ch2_value++;
 					Update_TIM3_CH2 (ConfStruct_local.manual_ch2_value);
 					need_a_change = 1;
@@ -210,6 +250,15 @@ unsigned char FuncManual (void)
 				sprintf(s_lcd, "%3d.%01d", one_int, one_dec);
 				Lcd_SetDDRAM(0x40 + 7);
 				LCDTransmitStr(s_lcd);
+
+				if (ConfStruct_local.manual_relays_usage == 1)
+				{
+					if (ConfStruct_local.manual_ch2_value >= RELAY_START)
+						RELAY2_ON;
+					else if (ConfStruct_local.manual_ch2_value <= RELAY_STOP)
+						RELAY2_OFF;
+				}
+
 			}
 
 			if (CheckSSel() > S_NO)

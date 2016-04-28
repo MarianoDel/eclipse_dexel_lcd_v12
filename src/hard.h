@@ -28,8 +28,10 @@ typedef struct Configuration
 
 	//--- Opciones de la Funcion DMX ---//
 	unsigned short dmx_addr;
-	unsigned char dmx_channel_quantity;
-	unsigned char dummy;					//subtotal 4 bytes
+	unsigned char dmx_channel_quantity;				//subtotal 3 bytes
+
+	//--- Opciones de la Funcion COLORS ---//
+	unsigned char colors_selected;					//subtotal 1 bytes
 
 } Configuration_Typedef;	//8 bytes alingned
 
@@ -164,9 +166,9 @@ enum var_main_states
 #define S_MIN		1
 #define S_NO		0
 
-//#define FUNCTION_DMX	1
-//#define FUNCTION_MAN	2
-//#define FUNCTION_CAT	FUNCTION_MAN
+//defines para los reles
+#define RELAY_START	15
+#define RELAY_STOP	10
 
 //----- Definiciones para el FAN ------
 #define TIMER_FAN_ROOF	600

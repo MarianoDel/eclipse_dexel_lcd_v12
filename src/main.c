@@ -65,6 +65,7 @@
 #include "synchro.h"
 #include "dmx_transceiver.h"
 #include "funcs_manual.h"
+#include "funcs_colors.h"
 
 #include "standalone.h"
 
@@ -534,7 +535,10 @@ int main(void)
 					main_state = MAIN_DMX;
 
 				if (resp == MAINMENU_SHOW_COLORS_SELECTED)
+				{
 					main_state = MAIN_COLORS;
+					function_enable_menu_timer = TT_MENU_ENABLED;
+				}
 
 				if (resp == MAINMENU_SHOW_BRD_DIAG_SELECTED)
 					main_state = MAIN_BRD_DIAG;
@@ -563,11 +567,13 @@ int main(void)
 				break;
 
 			case MAIN_COLORS:
-				/*
-				resp = FuncNetworked(jump_the_menu);
-				jump_the_menu = RESP_NO_CHANGE;
-				main_state++;
-				*/
+
+				resp = FuncColors();
+				if (resp == RESP_CHANGE_ALL_UP)
+				{
+					FuncColorsReset();
+					main_state = MAIN_INIT;
+				}
 				break;
 
 			/*
