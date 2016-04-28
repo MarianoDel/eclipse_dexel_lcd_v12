@@ -1,10 +1,9 @@
 /*
- * funcs_manual.c
+ * funcs_colors.c
  *
- *  Created on: 27/04/2016
+ *  Created on: 28/04/2016
  *      Author: Mariano
  */
-
 
 #include "funcs_manual.h"
 #include "hard.h"
@@ -224,7 +223,7 @@ unsigned char FuncManual (void)
 			break;
 
 		case MANUAL_GOING_CH1:
-			//estoy en CH2 intento ir a CH1 o going up
+			//cambio a canal 2
 			if (CheckSSel() == S_NO)
 			{
 				manual_state = MANUAL_CH1;
@@ -248,7 +247,6 @@ unsigned char FuncManual (void)
 				MenuManualReset();
 				manual_selections = MENU_ON;
 				manual_state = MANUAL_UPDATE;
-				manual_enable_menu_timer = TT_MENU_ENABLED;
 			}
 			break;
 
@@ -560,13 +558,14 @@ unsigned char MenuManual(void)
 	return resp;
 }
 
-void FuncManualReset (void)
+void FuncColorsReset (void)
 {
-	manual_state = MANUAL_INIT;
+	colors_state = COLORS_INIT;
 }
 
-void MenuManualReset(void)
+void MenuColorsReset(void)
 {
-	manual_menu_state = MANUAL_MENU_INIT;
+	colors_menu_state = COLORS_MENU_INIT;
 }
+
 

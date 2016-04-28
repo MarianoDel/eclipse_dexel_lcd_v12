@@ -1,27 +1,27 @@
 /*
- * funcs_manual.h
+ * funcs_dmx.h
  *
- *  Created on: 27/04/2016
+ *  Created on: 28/04/2016
  *      Author: Mariano
  */
 
-#ifndef FUNCS_MANUAL_H_
-#define FUNCS_MANUAL_H_
+#ifndef FUNCS_DMX_H_
+#define FUNCS_DMX_H_
 
-//estados del modo MANUAL
-enum var_manual_states
+//estados del modo DMX
+enum var_dmx_states
 {
 
-	MANUAL_INIT = 0,
-	MANUAL_UPDATE,
-	MANUAL_CH1,
-	MANUAL_CH1_1,
-	MANUAL_CH2,
-	MANUAL_CH2_1,
-	MANUAL_GOING_CH2,
-	MANUAL_GOING_CH1,
-	MANUAL_GOING_UP,
-	MANUAL_TO_SAVE
+	DMX_INIT = 0,
+	DMX_UPDATE,
+	DMX_CH1,
+	DMX_CH1_1,
+	DMX_CH2,
+	DMX_CH2_1,
+	DMX_GOING_CH2,
+	DMX_GOING_CH1,
+	DMX_GOING_UP,
+	DMX_TO_SAVE
 
 };
 
@@ -53,4 +53,4 @@ void FuncManualReset (void);
 void MenuManualReset (void);
 
 
-#endif /* FUNCS_MANUAL_H_ */
+#endif /* FUNCS_DMX_H_ */

@@ -84,6 +84,9 @@ volatile unsigned short wait_ms_var = 0;
 //volatile unsigned char *pspi_rx;
 //volatile unsigned char spi_bytes_left = 0;
 
+// ------- Externals Estructura de parametros generales -------
+Configuration_Typedef ConfStruct_local;
+
 // ------- Externals del DMX -------
 volatile unsigned char Packet_Detected_Flag;
 volatile unsigned char DMX_packet_flag;
@@ -118,21 +121,6 @@ volatile unsigned short take_temp_sample = 0;
 volatile unsigned short take_led_temp_sample = 0;
 volatile unsigned short minutes = 0;
 
-// ------- Externals de los modos -------
-StandAlone_Typedef const StandAloneStruct_constant =
-//StandAlone_Typedef __attribute__ ((section("memParams"))) const StandAloneStruct_constant =
-		{
-				.move_sensor_enable = 1,
-				.ldr_enable = 0,
-				.ldr_value = 100,
-				.max_dimmer_value_percent = 100,
-				.max_dimmer_value_dmx = 255,
-				.min_dimmer_value_percent = 1,
-				.min_dimmer_value_dmx = MIN_DIMMING,
-				.power_up_timer_value = 3000,
-				.dimming_up_timer_value = 3000
-		};
-
 
 // ------- del display LCD -------
 const char s_blank_line [] = {"                "};
@@ -149,7 +137,7 @@ float fcalc = 0.0;
 
 
 //--- VARIABLES GLOBALES ---//
-parameters_typedef param_struct;
+//parameters_typedef param_struct;
 
 // ------- de los timers -------
 volatile unsigned short timer_standby;
@@ -161,7 +149,22 @@ volatile unsigned char filter_timer;
 //volatile unsigned char move_relay;
 volatile unsigned short secs = 0;
 
-
+// ------- Para configuracion Inicial -------
+/*
+Configuration_Typedef const ConfStruct_constant =
+//StandAlone_Typedef __attribute__ ((section("memParams"))) const StandAloneStruct_constant =
+		{
+				.move_sensor_enable = 1,
+				.ldr_enable = 0,
+				.ldr_value = 100,
+				.max_dimmer_value_percent = 100,
+				.max_dimmer_value_dmx = 255,
+				.min_dimmer_value_percent = 1,
+				.min_dimmer_value_dmx = MIN_DIMMING,
+				.power_up_timer_value = 3000,
+				.dimming_up_timer_value = 3000
+		};
+*/
 
 
 // ------- del DMX -------
@@ -497,6 +500,9 @@ int main(void)
 
 	//leo la memoria, si tengo configuracion de modo
 	//entro directo, sino a Main Menu
+
+	//TODO: leer estructura y verificar funcion cargar valore sdefualt o ultimos seleccioneados
+//	memcpy(&ConfStruct_local, &ConfStruct_constant, sizeof(ConfStruct_local));
 
 	while (FuncShowBlink ((const char *) "Checking Memory ", s_blank_line, 1, BLINK_NO) != RESP_FINISH);
 

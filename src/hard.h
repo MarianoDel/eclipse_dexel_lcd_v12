@@ -14,6 +14,32 @@
 
 
 //-------- End Of Defines For Configuration ------
+
+
+//-------- Estructuras Generales para Configuracion -----------
+
+typedef struct Configuration
+{
+	//--- Opciones de la Funcion Manual ---//
+	unsigned char manual_channels_quantity;
+	unsigned char manual_ch1_value;
+	unsigned char manual_ch2_value;
+	unsigned char manual_relays_usage;				//subtotal 4 bytes
+
+	//--- Opciones de la Funcion DMX ---//
+	unsigned short dmx_addr;
+	unsigned char dmx_channel_quantity;
+	unsigned char dummy;					//subtotal 4 bytes
+
+} Configuration_Typedef;	//8 bytes alingned
+
+//-------- FIN Estructuras Generales para Configuracion -----------
+
+
+
+
+//-------- Defines For PINs Configuration -------------
+
 #ifdef VER_1_2
 //GPIOA pin0
 //GPIOA pin1
@@ -88,9 +114,7 @@
 
 #endif	//
 
-//#define DOOR_ROOF	200
-//#define DOOR_THRESH	180
-
+//-------- END of Defines For PINs Configuration -------------
 
 //ESTADOS DEL PROGRAMA PRINCIPAL
 //estados del MAIN MENU
@@ -122,8 +146,8 @@ enum var_main_states
 #define SHOW_NUMBERS	1
 
 #define SWITCHES_TIMER_RELOAD	10
-#define AC_SWITCH_TIMER_RELOAD	22
 
+#define SWITCHES_ROOF	500		//5 segundos
 #define SWITCHES_THRESHOLD_FULL	300		//3 segundos
 #define SWITCHES_THRESHOLD_HALF	100		//1 segundo
 #define SWITCHES_THRESHOLD_MIN	5		//50 ms

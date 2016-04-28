@@ -41,6 +41,7 @@ enum var_mainmenu_states
 #define RESP_NO				12
 #define RESP_NO_CHANGE		13
 
+
 //estados de la funcion SHOW SELECT
 #define SHOW_SELECT_INIT				0
 #define SHOW_SELECT_1					1
@@ -60,7 +61,8 @@ enum var_mainmenu_states
 #define OPTIONS_WAIT_SELECT_2			3
 #define OPTIONS_WAIT_SELECT_3			4
 
-#define OPTIONS_CHANGE_SELECT	10
+#define OPTIONS_CHANGE_SELECT_UP	10
+#define OPTIONS_CHANGE_SELECT_DWN	11
 
 //estados de la funcion SCROLL
 #define SCROLL_INIT				0

@@ -27,7 +27,10 @@ void UpdateSwitches (void)
 	if (!switches_timer)
 	{
 		if (S_DOWN)
-			sdown++;
+		{
+			if (sdown < SWITCHES_ROOF)
+				sdown++;
+		}
 		else if (sdown > 50)
 			sdown -= 50;
 		else if (sdown > 10)
@@ -36,7 +39,10 @@ void UpdateSwitches (void)
 			sdown--;
 
 		if (S_UP)
-			sup++;
+		{
+			if (sup < SWITCHES_ROOF)
+				sup++;
+		}
 		else if (sup > 50)
 			sup -= 50;
 		else if (sup > 10)
@@ -45,7 +51,10 @@ void UpdateSwitches (void)
 			sup--;
 
 		if (S_SEL)
+		{
+			if (ssel < SWITCHES_ROOF)
 			ssel++;
+		}
 		else if (ssel > 50)
 			ssel -= 50;
 		else if (ssel > 10)

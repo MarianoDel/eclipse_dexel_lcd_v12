@@ -584,7 +584,7 @@ unsigned char FuncOptions (const char * p_text1, const char * p_text2, unsigned 
 			else
 			{
 				if (options_curr_sel != (first_option & 0x7F)) //fuerzo el cambio, ya estaba mostrando la pantalla
-					options_state = OPTIONS_CHANGE_SELECT;
+					options_state = OPTIONS_CHANGE_SELECT_UP;	//TODO: no entiendo ue caraj hago aca!!!!
 			}
 		}
 		else
@@ -613,12 +613,13 @@ unsigned char FuncOptions (const char * p_text1, const char * p_text2, unsigned 
 			break;
 
 		case OPTIONS_WAIT_SELECT_1:
-			if (CheckS1() > S_NO)
-			{
-				options_state = OPTIONS_CHANGE_SELECT;
-			}
+			if (CheckSDown() > S_NO)
+				options_state = OPTIONS_CHANGE_SELECT_DWN;
 
-			if (CheckS2() > S_NO)
+			if (CheckSUp() > S_NO)
+				options_state = OPTIONS_CHANGE_SELECT_UP;
+
+			if (CheckSSel() > S_NO)
 			{
 				resp = (RESP_SELECTED | (options_curr_sel << 4));
 				options_state = OPTIONS_INIT;
@@ -634,19 +635,20 @@ unsigned char FuncOptions (const char * p_text1, const char * p_text2, unsigned 
 			break;
 
 		case OPTIONS_WAIT_SELECT_2:
-			if (CheckS1() == S_NO)
+			if ((CheckSDown() == S_NO) && (CheckSUp() == S_NO))
 			{
 				options_state = OPTIONS_WAIT_SELECT_1;
 			}
 			break;
 
 		case OPTIONS_WAIT_SELECT_3:
-			if (CheckS1() > S_NO)
-			{
-				options_state = OPTIONS_CHANGE_SELECT;
-			}
+			if (CheckSDown() > S_NO)
+				options_state = OPTIONS_CHANGE_SELECT_DWN;
 
-			if (CheckS2() > S_NO)
+			if (CheckSUp() > S_NO)
+				options_state = OPTIONS_CHANGE_SELECT_UP;
+
+			if (CheckSSel() > S_NO)
 			{
 				resp = (RESP_SELECTED | (options_curr_sel << 4));
 				options_state = OPTIONS_INIT;
@@ -661,7 +663,7 @@ unsigned char FuncOptions (const char * p_text1, const char * p_text2, unsigned 
 			}
 			break;
 
-		case OPTIONS_CHANGE_SELECT:
+		case OPTIONS_CHANGE_SELECT_UP:
 			Lcd_SetDDRAM(*(p_sel + options_curr_sel));
 			LCDTransmitStr(" ");
 
@@ -673,6 +675,26 @@ unsigned char FuncOptions (const char * p_text1, const char * p_text2, unsigned 
 					options_curr_sel++;
 				else
 					options_curr_sel = 0;
+			}
+
+			Lcd_SetDDRAM(*(p_sel + options_curr_sel));
+			LCDTransmitStr("*");
+
+			options_state = OPTIONS_WAIT_SELECT_2;
+			break;
+
+		case OPTIONS_CHANGE_SELECT_DWN:
+			Lcd_SetDDRAM(*(p_sel + options_curr_sel));
+			LCDTransmitStr(" ");
+
+			if (first_option & 0x80)	//me piden que elija una opcion especial
+				options_curr_sel = (first_option & 0x7F);
+			else
+			{
+				if (options_curr_sel > 0)	//recorre entre 0 y (opts - 1)
+					options_curr_sel--;
+				else
+					options_curr_sel = (opts - 1);
 			}
 
 			Lcd_SetDDRAM(*(p_sel + options_curr_sel));

@@ -1,20 +1,20 @@
 /*
- * funcs_manual.h
+ * funcs_colors.h
  *
- *  Created on: 27/04/2016
+ *  Created on: 28/04/2016
  *      Author: Mariano
  */
 
-#ifndef FUNCS_MANUAL_H_
-#define FUNCS_MANUAL_H_
+#ifndef FUNCS_COLORS_H_
+#define FUNCS_COLORS_H_
 
-//estados del modo MANUAL
-enum var_manual_states
+//estados del modo COLORS
+enum var_colors_states
 {
 
-	MANUAL_INIT = 0,
-	MANUAL_UPDATE,
-	MANUAL_CH1,
+	COLORS_INIT = 0,
+	COLORS_UPDATE,
+	COLORS_CH1,
 	MANUAL_CH1_1,
 	MANUAL_CH2,
 	MANUAL_CH2_1,
@@ -31,11 +31,11 @@ enum var_manual_states
 #define MENU_OFF		2
 #define MENU_WAIT_FREE	3
 
-//estados del menu MANUAL
-#define MANUAL_MENU_INIT				0
-#define MANUAL_MENU_CHANNELS			1
-#define MANUAL_MENU_RELAYS				2
-#define MANUAL_MENU_FINISH				3
+//estados del menu COLORS
+#define COLORS_MENU_INIT				0
+#define COLORS_MENU_CHANNELS			1
+#define COLORS_MENU_RELAYS				2
+#define COLORS_MENU_FINISH				3
 
 #define MANUAL_MENU_CHANNELS_SELECTED	10
 #define MANUAL_MENU_CHANNELS_SELECTED_1	11
@@ -53,4 +53,6 @@ void FuncManualReset (void);
 void MenuManualReset (void);
 
 
-#endif /* FUNCS_MANUAL_H_ */
+
+
+#endif /* FUNCS_COLORS_H_ */
