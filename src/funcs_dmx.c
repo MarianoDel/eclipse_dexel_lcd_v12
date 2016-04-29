@@ -236,6 +236,7 @@ unsigned char FuncDMX (void)
 			{
 				 DMX_packet_flag = 0;
 
+				 lcd_backlight_timer = TT_LCD_BACKLIGHT;
 				 //en data tengo la info
 				 if (last_ch2 != data[2])
 				 {
@@ -329,11 +330,15 @@ unsigned char FuncDMX (void)
 			resp_down = MenuDMX();
 
 			if (resp_down == RESP_WORKING)	//alguien esta tratando de seleccionar algo, le doy tiempo
+			{
 				dmx_enable_menu_timer = TT_MENU_ENABLED;
+				lcd_backlight_timer = TT_LCD_BACKLIGHT;
+			}
 
 			if (resp_down == RESP_SELECTED)	//se selecciono algo
 			{
 				dmx_enable_menu_timer = TT_MENU_ENABLED;
+				lcd_backlight_timer = TT_LCD_BACKLIGHT;
 				dmx_selections = MENU_SELECTED;
 			}
 
@@ -354,6 +359,7 @@ unsigned char FuncDMX (void)
 				LCD_2DO_RENGLON;
 				LCDTransmitStr((const char *)s_blank_line);
 
+				lcd_backlight_timer = TT_LCD_BACKLIGHT;
 				dmx_selections = MENU_OFF;
 			}
 			break;
@@ -370,6 +376,9 @@ unsigned char FuncDMX (void)
 			break;
 
 		case MENU_OFF:
+			//si alguien toco un control prendo el lcd_backlight
+			if ((CheckSUp() > S_NO) || (CheckSDown() > S_NO) || (CheckSSel() > S_NO))
+				lcd_backlight_timer = TT_LCD_BACKLIGHT;
 
 			break;
 

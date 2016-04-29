@@ -67,8 +67,8 @@
 #include "funcs_manual.h"
 #include "funcs_colors.h"
 #include "funcs_dmx.h"
+#include "funcs_brd_diag.h"
 
-#include "standalone.h"
 
 //--- VARIABLES EXTERNAS ---//
 volatile unsigned char timer_1seg = 0;
@@ -219,7 +219,7 @@ unsigned short vpote [LARGO_FILTRO + 1];
 int main(void)
 {
 	unsigned char i;
-	unsigned short ii;
+	unsigned short current_led_temp;
 	unsigned char resp = RESP_CONTINUE;
 	unsigned short local_meas = 0;
 	unsigned short local_meas_last = 0;
@@ -227,6 +227,7 @@ int main(void)
 	short one_int, one_dec;
 	char s_lcd [20];
 	enum var_main_states main_state = MAIN_INIT;
+	enum var_main_states last_main_state;
 
 
 #ifdef WITH_GRANDMASTER
@@ -578,18 +579,29 @@ int main(void)
 				}
 				break;
 
-			/*
-			case MAIN_NETWORKED_1:
-				resp = FuncNetworked(jump_the_menu);
-
+			case MAIN_BRD_DIAG:
+				resp = FuncBrdDiag();
 				if (resp == RESP_CHANGE_ALL_UP)
+				{
+					FuncBrdDiagReset();
 					main_state = MAIN_INIT;
+				}
 
 				break;
-			*/
 
-			case MAIN_BRD_DIAG:
-				main_state = MAIN_INIT;
+			case MAIN_OVERTEMP:
+				LCD_1ER_RENGLON;
+				LCDTransmitStr((const char *)"    OVERTEMP    ");
+				LCD_2DO_RENGLON;
+				LCDTransmitStr((const char *)s_blank_line);
+				break;
+
+			case MAIN_OVERTEMP_1:
+				if (GetLedTemp() < TEMP_IN_65)
+				{
+					main_state = last_main_state;
+				}
+				lcd_backlight_timer = TT_LCD_BACKLIGHT;
 				break;
 
 			default:
@@ -598,8 +610,30 @@ int main(void)
 
 		}
 
+		//Reviso la temperatura y muevo el FAN en consecuencia
+		if (main_state != MAIN_OVERTEMP_1)
+		{
+			current_led_temp = GetLedTemp();
+			if (current_led_temp > TEMP_IN_65)
+			{
+				last_main_state = main_state;
+				main_state = MAIN_OVERTEMP;
+				SetPWMFan(FAN_SPEED_HIGH);
+			}
+			else if (current_led_temp > TEMP_IN_50)
+				SetPWMFan(FAN_SPEED_MED);
+			else if (current_led_temp > TEMP_IN_35)
+				SetPWMFan(FAN_SPEED_LOW);
+			else
+				SetPWMFan(FAN_SPEED_OFF);
+
+		}
+
 		UpdateSwitches();
 		UpdatePackets();
+		UpdateLCDBackLight();
+		UpdateFan();
+		UpdateLedTemp();
 
 	}	//termina while(1)
 

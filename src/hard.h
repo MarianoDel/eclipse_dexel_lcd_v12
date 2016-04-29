@@ -33,11 +33,12 @@ typedef struct Configuration
 
 	//--- Opciones de la Funcion COLORS ---//
 	unsigned char colors_selected;					//subtotal 1 bytes
-	unsigned char dummy1;
-	unsigned char dummy2;
-	unsigned char dummy3;
 
-} Configuration_Typedef;	//8 bytes alingned
+	//--- Opciones de la Funcion BRD DIAG ---//
+	unsigned short brd_diag_saved_times;
+	unsigned char dummy1;							//subtotal 3 bytes
+
+} Configuration_Typedef;	//12 bytes aligned
 
 //-------- FIN Estructuras Generales para Configuracion -----------
 
@@ -130,7 +131,10 @@ enum var_main_states
 	MAIN_DMX,
 	MAIN_MANUAL,
 	MAIN_COLORS,
-	MAIN_BRD_DIAG
+	MAIN_BRD_DIAG,
+	MAIN_OVERTEMP,
+	MAIN_OVERTEMP_1
+
 };
 
 
@@ -164,6 +168,7 @@ enum var_main_states
 #define TIMER_STANDBY_TIMEOUT			6000	//6 segundos
 #define DMX_DISPLAY_SHOW_TIMEOUT		30000	//30 segundos
 #define TT_MENU_ENABLED					30000	//30 segundos
+#define TT_LCD_BACKLIGHT					30000	//30 segundos
 
 #define S_FULL		10
 #define S_HALF		3
@@ -176,6 +181,7 @@ enum var_main_states
 
 //----- Definiciones para el FAN ------
 #define TIMER_FAN_ROOF	600
+#define FAN_SPEED_OFF	0
 #define FAN_SPEED_LOW	200
 #define FAN_SPEED_MED	400
 #define FAN_SPEED_HIGH	TIMER_FAN_ROOF
@@ -191,6 +197,8 @@ void UpdateSwitches (void);
 unsigned char CheckSDown (void);
 unsigned char CheckSUp (void);
 unsigned char CheckSSel (void);
+
+void UpdateLCDBackLight (void);
 
 void UpdateFan (void);
 void SetPWMFan (unsigned short);

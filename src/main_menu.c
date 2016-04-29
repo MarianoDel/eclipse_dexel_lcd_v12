@@ -8,7 +8,6 @@
 #include "main_menu.h"
 #include "hard.h"
 #include "lcd.h"
-#include "standalone.h"
 #include <stdio.h>
 #include <string.h>
 

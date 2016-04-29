@@ -137,11 +137,15 @@ unsigned char FuncColors (void)
 			resp_down = MenuColors();
 
 			if (resp_down == RESP_WORKING)	//alguien esta tratando de seleccionar algo, le doy tiempo
+			{
 				colors_enable_menu_timer = TT_MENU_ENABLED;
+				lcd_backlight_timer = TT_LCD_BACKLIGHT;
+			}
 
 			if (resp_down == RESP_SELECTED)	//se selecciono algo
 			{
 				colors_enable_menu_timer = TT_MENU_ENABLED;
+				lcd_backlight_timer = TT_LCD_BACKLIGHT;
 				colors_selections = MENU_SELECTED;
 			}
 
@@ -162,6 +166,7 @@ unsigned char FuncColors (void)
 				LCD_2DO_RENGLON;
 				LCDTransmitStr((const char *)s_blank_line);
 
+				lcd_backlight_timer = TT_LCD_BACKLIGHT;
 				colors_selections = MENU_OFF;
 			}
 
@@ -182,6 +187,9 @@ unsigned char FuncColors (void)
 			break;
 
 		case MENU_OFF:
+			//si alguien toco un control prendo el lcd_backlight
+			if ((CheckSUp() > S_NO) || (CheckSDown() > S_NO) || (CheckSSel() > S_NO))
+				lcd_backlight_timer = TT_LCD_BACKLIGHT;
 
 			break;
 

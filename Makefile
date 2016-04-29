@@ -117,6 +117,7 @@ SRC += .\src\main_menu.c
 SRC += .\src\funcs_manual.c
 SRC += .\src\funcs_colors.c
 SRC += .\src\funcs_dmx.c
+SRC += .\src\funcs_brd_diag.c
 ## RDM libraries
 #SRC += .\src\rdm_util.c
 ## System Support

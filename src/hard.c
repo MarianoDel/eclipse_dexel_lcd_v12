@@ -16,6 +16,8 @@ extern unsigned short ssel;
 extern volatile unsigned char switches_timer;
 extern volatile unsigned short timer_fan_freerun;
 
+extern volatile unsigned short lcd_backlight_timer;
+
 // ------- Globales del Modulo -------
 unsigned short pwm_fan = 0;
 
@@ -75,6 +77,15 @@ void UpdateFan (void)
 		FAN_OFF;
 }
 
+void UpdateLCDBackLight (void)
+{
+	//si no tengo timer apago el backlight de display
+	if (!lcd_backlight_timer)
+		CTRL_BKL_OFF;
+	else
+		CTRL_BKL_ON;
+
+}
 void SetPWMFan (unsigned short a)
 {
 	//armo un PWM
