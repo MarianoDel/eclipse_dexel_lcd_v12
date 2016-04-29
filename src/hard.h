@@ -20,6 +20,9 @@
 
 typedef struct Configuration
 {
+	//--- Opciones General de modo de funcionamiento ---//
+	unsigned char general_mode;						//subtotal 1 bytes
+
 	//--- Opciones de la Funcion Manual ---//
 	unsigned char manual_channels_quantity;
 	unsigned char manual_ch1_value;
@@ -35,10 +38,15 @@ typedef struct Configuration
 	unsigned char colors_selected;					//subtotal 1 bytes
 
 	//--- Opciones de la Funcion BRD DIAG ---//
-	unsigned short brd_diag_saved_times;
-	unsigned char dummy1;							//subtotal 3 bytes
+	unsigned short brd_diag_saved_times;			//subtotal 2 bytes
+
 
 } Configuration_Typedef;	//12 bytes aligned
+
+//MODOS GENERALES DE FUNCIONAMIENTO
+#define GENERAL_DMX_MODE		1
+#define GENERAL_MANUAL_MODE		2
+#define GENERAL_COLORS_MODE		3
 
 //-------- FIN Estructuras Generales para Configuracion -----------
 
@@ -169,6 +177,8 @@ enum var_main_states
 #define DMX_DISPLAY_SHOW_TIMEOUT		30000	//30 segundos
 #define TT_MENU_ENABLED					30000	//30 segundos
 #define TT_LCD_BACKLIGHT					30000	//30 segundos
+
+#define TT_SAVE_MEMORY					10000	//10 segundo para grabar memoria
 
 #define S_FULL		10
 #define S_HALF		3

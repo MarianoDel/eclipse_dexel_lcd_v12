@@ -116,7 +116,7 @@ void ErasePage(uint32_t , unsigned char );
 unsigned char UpdateNewCode(unsigned int *, unsigned short, unsigned int);
 unsigned char WritePage(unsigned int *, uint32_t, unsigned char);
 unsigned char Write_Code_To_Memory_FLASH(unsigned short, unsigned int);
-unsigned char WriteConfigurations (void);
+
 void LoadFilesIndex (void);
 void UpdateFileIndex (unsigned char, unsigned int, unsigned int);
 void SaveFilesIndex (void);
@@ -126,6 +126,7 @@ void ShowFileSystem(void);
 void LoadConfiguration (void);
 void ShowConfiguration (void);
 
+unsigned char WriteConfigurations (void);
 unsigned char WriteFlash(unsigned int * p, uint32_t p_addr, unsigned char with_lock, unsigned char len_in_4);
 
 #endif

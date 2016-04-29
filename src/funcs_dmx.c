@@ -11,6 +11,7 @@
 #include "dmx_transceiver.h"
 #include "lcd.h"
 #include "stm32f0xx.h"
+#include "flash_program.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -21,9 +22,17 @@ extern volatile unsigned short function_timer;
 extern volatile unsigned short function_enable_menu_timer;
 extern unsigned char function_need_a_change;
 
+extern volatile unsigned short function_save_memory_timer;
+extern unsigned char function_save_memory;
+
+
 #define dmx_need_a_change function_need_a_change
 #define dmx_timer function_timer
 #define dmx_enable_menu_timer function_enable_menu_timer
+
+#define dmx_save_memory_timer function_save_memory_timer
+#define dmx_save_memory function_save_memory
+
 
 extern volatile unsigned short lcd_backlight_timer;
 
@@ -124,6 +133,11 @@ unsigned char FuncDMX (void)
 				}
 				last_ch1 = 0;
 				last_ch2 = 0;
+
+				//se cambio algo pido que se grabe
+				dmx_save_memory_timer = TT_SAVE_MEMORY;
+				dmx_save_memory = 1;
+
 			}
 			break;
 
@@ -396,9 +410,22 @@ unsigned char FuncDMX (void)
 	}
 
 
+	//solo salgo si tengo el menu prendido y no estoy eligiendo DMX
 	//salgo del menu si no estoy eligiendo address del DMX
-	if ((CheckSSel() > S_HALF) && (dmx_menu_state != DMX_MENU_ADDRESS_SELECTED_1))
+	if ((CheckSSel() > S_HALF) && (dmx_menu_state != DMX_MENU_ADDRESS_SELECTED_1) && (dmx_selections != MENU_OFF))
 		resp = RESP_CHANGE_ALL_UP;
+
+	//me fijo si necesito grabar si agoto el timer
+	if (!dmx_save_memory_timer)
+	{
+		if (dmx_save_memory)	//y necesito grabar
+		{
+			DMX_Disa();
+			dmx_save_memory = 0;
+			WriteConfigurations();
+			DMX_Ena();
+		}
+	}
 
 
 	return resp;

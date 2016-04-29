@@ -18,6 +18,7 @@
 
 #include "flash_program.h"
 #include "stm32f0xx_flash.h"
+#include "hard.h"
 
 
 
@@ -39,6 +40,7 @@ extern parameters_typedef param_struct;
 extern parameters_typedef param_struct;
 #endif
 
+extern Configuration_Typedef ConfStruct_local;
 /* Private typedef -----------------------------------------------------------*/
 
 
@@ -217,14 +219,16 @@ unsigned char WritePage(unsigned int * p, uint32_t p_addr, unsigned char with_lo
 
 unsigned char WriteConfigurations (void)
 {
-	parameters_typedef * p_param;
+	Configuration_Typedef * p_param;
+
+	ConfStruct_local.brd_diag_saved_times += 1;
 
 	ErasePage(PAGE31,0);
 
 	//update en memoria
-	p_param = &param_struct;
+	p_param = &ConfStruct_local;
 
-	if (WriteFlash((unsigned int *) p_param, PAGE31, 1, sizeof(parameters_typedef)) == FAILED)
+	if (WriteFlash((unsigned int *) p_param, PAGE31, 1, sizeof(Configuration_Typedef)) == FAILED)
 		return FAILED;
 
 	return PASSED;

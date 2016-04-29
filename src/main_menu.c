@@ -22,6 +22,8 @@ extern volatile unsigned short scroll2_timer;
 
 extern const char s_blank_line [];
 
+extern volatile unsigned short lcd_backlight_timer;
+
 /* Global variables ------------------------------------------------------------*/
 enum var_mainmenu_states mainmenu_state = MAINMENU_INIT;
 unsigned char mainmenu_repeat = 0;
@@ -60,11 +62,17 @@ unsigned char FuncMainMenu (void)
 			resp_down = FuncShowBlink ((const char *) "    Entering    ", (const char *) "   Main Menu    ", 3, BLINK_DIRECT);
 
 			if (resp_down == RESP_FINISH)
+			{
+				FuncShowSelectv2Reset();
 				mainmenu_state = MAINMENU_SHOW_MANUAL;
+			}
+
+
 			break;
 
 		case MAINMENU_SHOW_MANUAL:
 			resp_down = FuncShowSelectv2((const char *) "  MANUAL DIMMER ");
+
 
 			if (resp_down == RESP_CHANGE_DWN)
 				mainmenu_state = MAINMENU_SHOW_BRD_DIAG;
@@ -187,6 +195,11 @@ unsigned char FuncMainMenu (void)
 			mainmenu_state = MAINMENU_INIT;
 			break;
 	}
+
+	//si alguien toco un control prendo el lcd_backlight
+	if ((CheckSUp() > S_NO) || (CheckSDown() > S_NO) || (CheckSSel() > S_NO))
+		lcd_backlight_timer = TT_LCD_BACKLIGHT;
+
 	return resp;
 }
 

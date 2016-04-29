@@ -73,9 +73,9 @@
 //--- VARIABLES EXTERNAS ---//
 volatile unsigned char timer_1seg = 0;
 
-volatile unsigned short timer_led_comm = 0;
-volatile unsigned short timer_for_cat_switch = 0;
-volatile unsigned short timer_for_cat_display = 0;
+//volatile unsigned short timer_led_comm = 0;
+//volatile unsigned short timer_for_cat_switch = 0;
+//volatile unsigned short timer_for_cat_display = 0;
 volatile unsigned char buffrx_ready = 0;
 volatile unsigned char *pbuffrx;
 volatile unsigned short wait_ms_var = 0;
@@ -100,7 +100,7 @@ volatile unsigned char DMX_channel_quantity = 4;
 
 volatile unsigned char data1[512];
 //static unsigned char data_back[10];
-volatile unsigned char data[256];
+volatile unsigned char data[12];
 
 // ------- Externals de los timers -------
 //volatile unsigned short prog_timer = 0;
@@ -115,6 +115,8 @@ volatile unsigned short scroll2_timer = 0;
 volatile unsigned short function_timer;
 volatile unsigned short function_enable_menu_timer;
 unsigned char function_need_a_change = 0;
+volatile unsigned short function_save_memory_timer;
+unsigned char function_save_memory;
 
 volatile unsigned short lcd_backlight_timer = 0;
 
@@ -221,25 +223,11 @@ int main(void)
 	unsigned char i;
 	unsigned short current_led_temp;
 	unsigned char resp = RESP_CONTINUE;
-	unsigned short local_meas = 0;
-	unsigned short local_meas_last = 0;
-	unsigned short local_meas_led_last = 0;
-	short one_int, one_dec;
-	char s_lcd [20];
+
 	enum var_main_states main_state = MAIN_INIT;
 	enum var_main_states last_main_state;
 
 
-#ifdef WITH_GRANDMASTER
-	unsigned short acc = 0;
-	unsigned char dummy = 0;
-#endif
-#ifdef RGB_FOR_CAT
-	unsigned char show_channels_state = 0;
-	unsigned char fixed_data[2];		//la eleccion del usaario en los canales de 0 a 100
-	unsigned char need_to_save = 0;
-#endif
-	parameters_typedef * p_mem_init;
 	//!< At this stage the microcontroller clock setting is already configured,
     //   this is done through SystemInit() function which is called from startup
     //   file (startup_stm32f0xx.s) before to branch to application main.
@@ -502,21 +490,32 @@ int main(void)
 	//leo la memoria, si tengo configuracion de modo
 	//entro directo, sino a Main Menu
 
-	//TODO: leer estructura y verificar funcion cargar valore sdefualt o ultimos seleccioneados
-//	memcpy(&ConfStruct_local, &ConfStruct_constant, sizeof(ConfStruct_local));
+	memcpy(&ConfStruct_local, (Configuration_Typedef *) PAGE31, sizeof(ConfStruct_local));
 
 	while (FuncShowBlink ((const char *) "Checking Memory ", s_blank_line, 1, BLINK_NO) != RESP_FINISH);
 
-//	if (saved_mode == 0xFF)	//memoria borrada
-//	{
+	//REVISO SI LA MEMORIA ESTA BORRADA
+	if (ConfStruct_local.general_mode == GENERAL_DMX_MODE)
+		main_state = MAIN_DMX;
+	else if (ConfStruct_local.general_mode == GENERAL_MANUAL_MODE)
+		main_state = MAIN_MANUAL;
+	else if	(ConfStruct_local.general_mode == GENERAL_COLORS_MODE)
+		main_state = MAIN_COLORS;
+	else
+	{
+		//Memoria Borrada
 		while (FuncShowBlink ((const char *) "  Memory Empty  ", s_blank_line, 1, BLINK_NO) != RESP_FINISH);
 		main_state = MAIN_INIT;
-//	}
-//	else
-		//TODO: aca deberia revisar a que estado debo entrar en forma directa!!!!!!
-//		main_state = MAIN_INIT;
 
+		//default para MANUAL
 
+		//default para DMX
+		ConfStruct_local.dmx_addr = 1;
+
+		//default para COLORS
+
+	}
+	lcd_backlight_timer = TT_LCD_BACKLIGHT;
 
 	while (1)
 	{
@@ -528,18 +527,21 @@ int main(void)
 				if (resp == MAINMENU_SHOW_MANUAL_SELECTED)
 				{
 					main_state = MAIN_MANUAL;
+					ConfStruct_local.general_mode = GENERAL_MANUAL_MODE;
 					function_enable_menu_timer = TT_MENU_ENABLED;
 				}
 
 				if (resp == MAINMENU_SHOW_DMX_SELECTED)
 				{
 					main_state = MAIN_DMX;
+					ConfStruct_local.general_mode = GENERAL_DMX_MODE;
 					function_enable_menu_timer = TT_MENU_ENABLED;
 				}
 
 				if (resp == MAINMENU_SHOW_COLORS_SELECTED)
 				{
 					main_state = MAIN_COLORS;
+					ConfStruct_local.general_mode = GENERAL_COLORS_MODE;
 					function_enable_menu_timer = TT_MENU_ENABLED;
 				}
 
@@ -586,7 +588,6 @@ int main(void)
 					FuncBrdDiagReset();
 					main_state = MAIN_INIT;
 				}
-
 				break;
 
 			case MAIN_OVERTEMP:
@@ -594,6 +595,7 @@ int main(void)
 				LCDTransmitStr((const char *)"    OVERTEMP    ");
 				LCD_2DO_RENGLON;
 				LCDTransmitStr((const char *)s_blank_line);
+				main_state++;
 				break;
 
 			case MAIN_OVERTEMP_1:
@@ -852,11 +854,11 @@ void TimingDelay_Decrement(void)
 	if (function_timer)
 		function_timer--;
 
-//	if (standalone_menu_timer)
-//		standalone_menu_timer--;
-
 	if (function_enable_menu_timer)
 		function_enable_menu_timer--;
+
+	if (function_save_memory_timer)
+		function_save_memory_timer--;
 
 /*
 	//cuenta de a 1 minuto

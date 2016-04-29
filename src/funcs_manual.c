@@ -12,6 +12,7 @@
 #include "dmx_transceiver.h"
 #include "lcd.h"
 #include "stm32f0xx.h"
+#include "flash_program.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -22,9 +23,15 @@ extern volatile unsigned short function_timer;
 extern volatile unsigned short function_enable_menu_timer;
 extern unsigned char function_need_a_change;
 
+extern volatile unsigned short function_save_memory_timer;
+extern unsigned char function_save_memory;
+
 #define manual_need_a_change function_need_a_change
 #define manual_timer function_timer
 #define manual_enable_menu_timer function_enable_menu_timer
+
+#define manual_save_memory_timer function_save_memory_timer
+#define manual_save_memory function_save_memory
 
 extern volatile unsigned short lcd_backlight_timer;
 
@@ -97,6 +104,10 @@ unsigned char FuncManual (void)
 				Update_TIM3_CH1 (ConfStruct_local.manual_ch1_value);
 				Update_TIM3_CH2 (ConfStruct_local.manual_ch2_value);
 
+				//se cambio algo pido que se grabe
+				manual_save_memory_timer = TT_SAVE_MEMORY;
+				manual_save_memory = 1;
+
 			}
 
 			break;
@@ -138,6 +149,10 @@ unsigned char FuncManual (void)
 
 			if (manual_need_a_change)
 			{
+				//se cambio algo pido que se grabe
+				manual_save_memory_timer = TT_SAVE_MEMORY;
+				manual_save_memory = 1;
+
 				manual_need_a_change = 0;
 				fcalc = ConfStruct_local.manual_ch1_value;
 				fcalc = fcalc * K_100P;
@@ -241,6 +256,10 @@ unsigned char FuncManual (void)
 
 			if (manual_need_a_change)
 			{
+				//se cambio algo pido que se grabe
+				manual_save_memory_timer = TT_SAVE_MEMORY;
+				manual_save_memory = 1;
+
 				manual_need_a_change = 0;
 				fcalc = ConfStruct_local.manual_ch2_value;
 				fcalc = fcalc * K_100P;
@@ -388,6 +407,16 @@ unsigned char FuncManual (void)
 		resp = RESP_CHANGE_ALL_UP;
 	}
 
+	//me fijo si necesito grabar si agoto el timer
+	if (!manual_save_memory_timer)
+	{
+		if (manual_save_memory)	//y necesito grabar
+		{
+			manual_save_memory = 0;
+			WriteConfigurations();
+
+		}
+	}
 
 	return resp;
 }

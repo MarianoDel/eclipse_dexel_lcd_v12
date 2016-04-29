@@ -10,6 +10,7 @@
 #include "main_menu.h"
 #include "dmx_transceiver.h"
 #include "lcd.h"
+#include "flash_program.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -19,8 +20,15 @@
 extern volatile unsigned short function_timer;
 extern volatile unsigned short function_enable_menu_timer;
 
+extern volatile unsigned short function_save_memory_timer;
+extern unsigned char function_save_memory;
+
+
 #define colors_timer function_timer
 #define colors_enable_menu_timer function_enable_menu_timer
+
+#define colors_save_memory_timer function_save_memory_timer
+#define colors_save_memory function_save_memory
 
 extern volatile unsigned short lcd_backlight_timer;
 
@@ -69,6 +77,11 @@ unsigned char FuncColors (void)
 
 				LCD_1ER_RENGLON;
 				LCDTransmitStr((const char *) " DEXEL LIGHTING ");
+
+				//se cambio algo pido que se grabe
+				colors_save_memory_timer = TT_SAVE_MEMORY;
+				colors_save_memory = 1;
+
 
 			}
 			break;
@@ -254,6 +267,16 @@ unsigned char FuncColors (void)
 		resp = RESP_CHANGE_ALL_UP;
 	}
 
+	//me fijo si necesito grabar si agoto el timer
+	if (!colors_save_memory_timer)
+	{
+		if (colors_save_memory)	//y necesito grabar
+		{
+			colors_save_memory = 0;
+			WriteConfigurations();
+
+		}
+	}
 
 	return resp;
 }
