@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "funcs_manual.h"
+
 /* Externals variables ---------------------------------------------------------*/
 //extern volatile unsigned short mainmenu_timer;
 extern volatile unsigned short show_select_timer;
@@ -40,7 +42,7 @@ unsigned char blinking_state = 0;
 unsigned char blinking_how_many = 0;
 
 unsigned char change_state = 0;
-unsigned char change_current_val = 0;
+unsigned short change_current_val = 0;
 unsigned char change_last_option = 0;
 
 const unsigned char s_sel_up_down [] = { 0x02, 0x08, 0x0f };
@@ -720,7 +722,7 @@ void FuncOptionsReset (void)
 //recibe el modo CHANGE_PERCENT, CHANGE_SECS o CHANGE_CHANNELS Ademas puede tener |CHANGE_RESET
 //recibe min val permitido, MAX val permitido
 //devuelve RESP_CONTINUE o RESP_FINISH si termino la seleccion
-unsigned char FuncChange (unsigned char * p_orig_value, unsigned char mode, unsigned char min_val, unsigned char max_val)
+unsigned char FuncChange (unsigned short * p_orig_value, unsigned char mode, unsigned short min_val, unsigned short max_val)
 {
 	unsigned char resp = RESP_CONTINUE;
 	unsigned char resp_down = RESP_CONTINUE;
@@ -736,53 +738,58 @@ unsigned char FuncChange (unsigned char * p_orig_value, unsigned char mode, unsi
 			break;
 
 		case CHANGE_WAIT_SELECT:
-			memset(s_current, ' ', sizeof(s_current));
-			if (mode == CHANGE_PERCENT)
+			if (!scroll2_timer)
 			{
-				sprintf(s_current, "chg  %3d", change_current_val);
-				strcat(s_current, (const char*)"%   sel");
-			}
-			else if (mode == CHANGE_SECS)
-			{
-				sprintf(s_current, "chg %2d", change_current_val);
-				strcat(s_current, (const char*)" secs sel");
-			}
-			else	//debe ser CHANNELS
-			{
-				sprintf(s_current, "chg   %3d", change_current_val);
-				strcat(s_current, (const char*)"ch  sel");
-			}
-
-			resp_down = FuncOptions ((const char *) "up  down   done ", s_current,(unsigned char *) s_sel_up_down, 3, change_last_option);
-			change_last_option = 0;
-
-			if ((resp_down & 0x0f) == RESP_SELECTED)
-			{
-				resp_down = resp_down & 0xf0;
-				resp_down >>= 4;
-				if (resp_down == 0)
+				scroll2_timer = TT_UPDATE_BUTTON;
+				memset(s_current, ' ', sizeof(s_current));
+				if (mode == CHANGE_PERCENT)
 				{
-					if (change_current_val < max_val)
-						change_current_val++;
-
-					resp = RESP_WORKING;
+					sprintf(s_current, "chg  %3d", change_current_val);
+					strcat(s_current, (const char*)"%   sel");
+				}
+				else if (mode == CHANGE_SECS)
+				{
+					sprintf(s_current, "chg %2d", change_current_val);
+					strcat(s_current, (const char*)" secs sel");
+				}
+				else	//debe ser CHANNELS
+				{
+					sprintf(s_current, "chg   %3d", change_current_val);
+					strcat(s_current, (const char*)"ch  sel");
 				}
 
-				if (resp_down == 1)
-				{
-					if (change_current_val > min_val)
-						change_current_val--;
+				resp_down = FuncOptions ((const char *) "up  down   done ", s_current,(unsigned char *) s_sel_up_down, 3, change_last_option);
+				change_last_option = 0;
 
-					change_last_option = (1 | 0x80);	//fuerzo update de la opcion
-					resp = RESP_WORKING;
+				if ((resp_down & 0x0f) == RESP_SELECTED)
+				{
+					resp_down = resp_down & 0xf0;
+					resp_down >>= 4;
+					if (resp_down == 0)
+					{
+						if (change_current_val < max_val)
+							change_current_val++;
+
+						resp = RESP_WORKING;
+					}
+
+					if (resp_down == 1)
+					{
+						if (change_current_val > min_val)
+							change_current_val--;
+
+						change_last_option = (1 | 0x80);	//fuerzo update de la opcion
+						resp = RESP_WORKING;
+					}
+
+					if (resp_down == 2)
+					{
+						change_state = CHANGE_INIT;
+						resp = RESP_FINISH;
+						*p_orig_value = change_current_val;
+					}
 				}
 
-				if (resp_down == 2)
-				{
-					change_state = CHANGE_INIT;
-					resp = RESP_FINISH;
-					*p_orig_value = change_current_val;
-				}
 			}
 			break;
 

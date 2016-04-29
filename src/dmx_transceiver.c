@@ -20,7 +20,7 @@ extern volatile unsigned char data[];
 
 
 //--- VARIABLES GLOBALES ---//
-volatile unsigned char dmx_state = 0;
+//volatile unsigned char dmx_transc_state = 0;
 
 
 //--- FUNCIONES DEL MODULO ---//

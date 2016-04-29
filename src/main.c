@@ -66,6 +66,7 @@
 #include "dmx_transceiver.h"
 #include "funcs_manual.h"
 #include "funcs_colors.h"
+#include "funcs_dmx.h"
 
 #include "standalone.h"
 
@@ -113,6 +114,7 @@ volatile unsigned short scroll2_timer = 0;
 
 volatile unsigned short function_timer;
 volatile unsigned short function_enable_menu_timer;
+unsigned char function_need_a_change = 0;
 
 volatile unsigned short lcd_backlight_timer = 0;
 
@@ -532,7 +534,10 @@ int main(void)
 				}
 
 				if (resp == MAINMENU_SHOW_DMX_SELECTED)
+				{
 					main_state = MAIN_DMX;
+					function_enable_menu_timer = TT_MENU_ENABLED;
+				}
 
 				if (resp == MAINMENU_SHOW_COLORS_SELECTED)
 				{
@@ -546,11 +551,11 @@ int main(void)
 				break;
 
 			case MAIN_DMX:
-				//resp = FuncManual();
+				resp = FuncDMX();
 
 				if (resp == RESP_CHANGE_ALL_UP)
 				{
-//					FuncManualReset();
+					FuncDMXReset();
 					main_state = MAIN_INIT;
 				}
 
@@ -587,11 +592,7 @@ int main(void)
 			*/
 
 			case MAIN_BRD_DIAG:
-				/*
-				resp = FuncNetworked(jump_the_menu);
-				jump_the_menu = RESP_NO_CHANGE;
-				main_state++;
-				*/
+				main_state = MAIN_INIT;
 				break;
 
 			default:

@@ -28,10 +28,14 @@ typedef struct Configuration
 
 	//--- Opciones de la Funcion DMX ---//
 	unsigned short dmx_addr;
-	unsigned char dmx_channel_quantity;				//subtotal 3 bytes
+	unsigned char dmx_channel_quantity;
+	unsigned char dmx_relays_usage;					//subtotal 4 bytes
 
 	//--- Opciones de la Funcion COLORS ---//
 	unsigned char colors_selected;					//subtotal 1 bytes
+	unsigned char dummy1;
+	unsigned char dummy2;
+	unsigned char dummy3;
 
 } Configuration_Typedef;	//8 bytes alingned
 

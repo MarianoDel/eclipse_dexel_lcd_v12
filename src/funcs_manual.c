@@ -20,7 +20,9 @@
 /* Externals variables ---------------------------------------------------------*/
 extern volatile unsigned short function_timer;
 extern volatile unsigned short function_enable_menu_timer;
+extern unsigned char function_need_a_change;
 
+#define manual_need_a_change function_need_a_change
 #define manual_timer function_timer
 #define manual_enable_menu_timer function_enable_menu_timer
 
@@ -42,7 +44,7 @@ const unsigned char s_sel_ch [] = { 0x43, 0x48, 0x4f };
 #define K_1TO10		0.0392
 #define K_100P		0.3925
 extern float fcalc;
-unsigned char need_a_change = 0;
+
 
 
 //-------- Functions -------------
@@ -105,7 +107,7 @@ unsigned char FuncManual (void)
 			LCD_2DO_RENGLON;
 			LCDTransmitStr((const char *) "Ch: 1       %  M");
 			manual_state = MANUAL_CH1_1;
-			need_a_change = 1;
+			manual_need_a_change = 1;
 			break;
 
 		case MANUAL_CH1_1:
@@ -118,7 +120,7 @@ unsigned char FuncManual (void)
 					ConfStruct_local.manual_ch1_value--;
 
 					Update_TIM3_CH1 (ConfStruct_local.manual_ch1_value);
-					need_a_change = 1;
+					manual_need_a_change = 1;
 				}
 			}
 
@@ -130,13 +132,13 @@ unsigned char FuncManual (void)
 					ConfStruct_local.manual_ch1_value++;
 
 					Update_TIM3_CH1 (ConfStruct_local.manual_ch1_value);
-					need_a_change = 1;
+					manual_need_a_change = 1;
 				}
 			}
 
-			if (need_a_change)
+			if (manual_need_a_change)
 			{
-				need_a_change = 0;
+				manual_need_a_change = 0;
 				fcalc = ConfStruct_local.manual_ch1_value;
 				fcalc = fcalc * K_100P;
 				one_int = (short) fcalc;
@@ -209,7 +211,7 @@ unsigned char FuncManual (void)
 			LCD_2DO_RENGLON;
 			LCDTransmitStr((const char *) "Ch: 2       %  M");
 			manual_state = MANUAL_CH2_1;
-			need_a_change = 1;
+			manual_need_a_change = 1;
 			break;
 
 		case MANUAL_CH2_1:
@@ -222,7 +224,7 @@ unsigned char FuncManual (void)
 					ConfStruct_local.manual_ch2_value--;
 
 					Update_TIM3_CH2 (ConfStruct_local.manual_ch2_value);
-					need_a_change = 1;
+					manual_need_a_change = 1;
 				}
 			}
 
@@ -233,13 +235,13 @@ unsigned char FuncManual (void)
 					manual_timer = TT_UPDATE_BUTTON;
 					ConfStruct_local.manual_ch2_value++;
 					Update_TIM3_CH2 (ConfStruct_local.manual_ch2_value);
-					need_a_change = 1;
+					manual_need_a_change = 1;
 				}
 			}
 
-			if (need_a_change)
+			if (manual_need_a_change)
 			{
-				need_a_change = 0;
+				manual_need_a_change = 0;
 				fcalc = ConfStruct_local.manual_ch2_value;
 				fcalc = fcalc * K_100P;
 				one_int = (short) fcalc;
@@ -356,64 +358,13 @@ unsigned char FuncManual (void)
 			break;
 
 		case MENU_OFF:
-			/*
-			//estado menu apagado ESTADO NORMAL
-			if (CheckSSel() > S_NO)
-			{
-				manual_enable_menu_timer = TT_MENU_ENABLED;			//vuelvo a mostrar
-				LCD_1ER_RENGLON;
-				LCDTransmitStr((const char *) "wait to free    ");
-				manual_selections++;
-			}
-			*/
+
 			break;
 
 		case MENU_WAIT_FREE:
 			if (CheckSSel() == S_NO)
 			{
 				manual_selections = MENU_ON;
-				//voy a activar el Menu
-				//me fijo en ue parte del Menu estaba
-				//TODO ES UNA CHANCHADA, PERO BUENO...
-
-				/*
-				if (standalone_menu_state <= STAND_ALONE_MENU_RAMP_ON_DIMMING)
-				{
-					//salgo directo
-					LCD_2DO_RENGLON;
-					LCDTransmitStr((const char *) "Cont.     Select");
-				}
-				else
-				{
-					if (standalone_menu_state <= STAND_ALONE_MENU_MOV_SENS_SELECTED_2)
-					{
-						standalone_menu_state = STAND_ALONE_MENU_MOV_SENS;
-					}
-					else if (standalone_menu_state <= STAND_ALONE_MENU_LDR_SELECTED_5)
-					{
-						standalone_menu_state = STAND_ALONE_MENU_LDR;
-					}
-					else if (standalone_menu_state <= STAND_ALONE_MENU_MAX_DIMMING_SELECTED_1)
-					{
-						standalone_menu_state = STAND_ALONE_MENU_MAX_DIMMING;
-					}
-					else if (standalone_menu_state <= STAND_ALONE_MENU_MIN_DIMMING_SELECTED_1)
-					{
-						standalone_menu_state = STAND_ALONE_MENU_MIN_DIMMING;
-					}
-					else if (standalone_menu_state <= STAND_ALONE_MENU_RAMP_ON_START_SELECTED_1)
-					{
-						standalone_menu_state =STAND_ALONE_MENU_RAMP_ON_START;
-					}
-					else if (standalone_menu_state <= STAND_ALONE_MENU_RAMP_ON_DIMMING_SELECTED_1)
-					{
-						standalone_menu_state = STAND_ALONE_MENU_RAMP_ON_DIMMING;
-					}
-					FuncOptionsReset ();
-					FuncShowSelectv2Reset ();
-					FuncChangeReset ();
-				}
-				*/
 			}
 			break;
 

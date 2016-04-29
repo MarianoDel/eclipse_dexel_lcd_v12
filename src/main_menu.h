@@ -96,7 +96,7 @@ enum var_mainmenu_states
 //wrapers de la funcion FuncChange
 #define FuncChangePercent(X)	FuncChange(X, CHANGE_PERCENT, 0, 100)
 #define FuncChangeSecs(X)		FuncChange(X, CHANGE_SECS, 0, 10)
-#define FuncChangeChannels(X)	FuncChange(X, CHANGE_CHANNELS, 1, 255)
+#define FuncChangeChannels(X)	FuncChange(X, CHANGE_CHANNELS, 1, 512)
 #define FuncChangePercentReset()	FuncChangeReset()
 #define FuncChangeSecsReset()	FuncChangeReset()
 #define FuncChangeChannelsReset()	FuncChangeReset()
@@ -110,7 +110,7 @@ unsigned char FuncScroll1 (const char *);
 unsigned char FuncScroll2 (const char *);
 unsigned char FuncShowBlink (const char * , const char * , unsigned char, unsigned char);
 //unsigned char FuncChange (unsigned char *);
-unsigned char FuncChange (unsigned char *, unsigned char , unsigned char , unsigned char );
+unsigned char FuncChange (unsigned short *, unsigned char , unsigned short , unsigned short );
 
 void FuncOptionsReset (void);
 void FuncShowSelectv2Reset (void);
