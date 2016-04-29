@@ -35,6 +35,12 @@ extern volatile unsigned char DMX_channel_quantity;
 extern volatile unsigned char data1[];
 extern volatile unsigned char data[];
 
+extern unsigned char vd0 [];
+extern unsigned char vd1 [];
+extern unsigned char MAFilter (unsigned char, unsigned char *);
+
+extern volatile unsigned char filter_timer;
+
 extern const char s_blank_line [];
 
 extern Configuration_Typedef ConfStruct_local;
@@ -116,8 +122,6 @@ unsigned char FuncDMX (void)
 					RELAY1_OFF;
 					RELAY2_OFF;
 				}
-				//Update_TIM3_CH1 (ConfStruct_local.manual_ch1_value);
-				//Update_TIM3_CH2 (ConfStruct_local.manual_ch2_value);
 				last_ch1 = 0;
 				last_ch2 = 0;
 			}
@@ -309,6 +313,14 @@ unsigned char FuncDMX (void)
 			break;
 	}
 
+	if (!filter_timer)
+	{
+		filter_timer = 5;
+
+		Update_TIM3_CH1 (MAFilter(data[1], vd0));
+		Update_TIM3_CH2 (MAFilter(data[2], vd1));
+	}
+
 	//veo el de configuracion hasta TT_MENU_ENABLED
 	switch (dmx_selections)
 	{
@@ -373,6 +385,7 @@ unsigned char FuncDMX (void)
 			dmx_enable_menu_timer = TT_MENU_ENABLED;
 			break;
 	}
+
 
 	//salgo del menu si no estoy eligiendo address del DMX
 	if ((CheckSSel() > S_HALF) && (dmx_menu_state != DMX_MENU_ADDRESS_SELECTED_1))

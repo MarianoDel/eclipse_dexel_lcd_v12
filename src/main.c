@@ -176,13 +176,10 @@ volatile unsigned char dmx_timeout_timer = 0;
 //unsigned short tim_counter_65ms = 0;
 
 // ------- de los filtros DMX -------
-#define LARGO_F		32
-#define DIVISOR_F	5
+#define LARGO_F		16
+#define DIVISOR_F	4
 unsigned char vd0 [LARGO_F + 1];
 unsigned char vd1 [LARGO_F + 1];
-unsigned char vd2 [LARGO_F + 1];
-unsigned char vd3 [LARGO_F + 1];
-unsigned char vd4 [LARGO_F + 1];
 
 
 #define IDLE	0
