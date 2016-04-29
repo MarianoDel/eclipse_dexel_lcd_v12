@@ -210,48 +210,6 @@ unsigned char FuncColors (void)
 			if (CheckSSel() == S_NO)
 			{
 				colors_selections = MENU_ON;
-				//voy a activar el Menu
-				//me fijo en ue parte del Menu estaba
-				//TODO ES UNA CHANCHADA, PERO BUENO...
-
-				/*
-				if (standalone_menu_state <= STAND_ALONE_MENU_RAMP_ON_DIMMING)
-				{
-					//salgo directo
-					LCD_2DO_RENGLON;
-					LCDTransmitStr((const char *) "Cont.     Select");
-				}
-				else
-				{
-					if (standalone_menu_state <= STAND_ALONE_MENU_MOV_SENS_SELECTED_2)
-					{
-						standalone_menu_state = STAND_ALONE_MENU_MOV_SENS;
-					}
-					else if (standalone_menu_state <= STAND_ALONE_MENU_LDR_SELECTED_5)
-					{
-						standalone_menu_state = STAND_ALONE_MENU_LDR;
-					}
-					else if (standalone_menu_state <= STAND_ALONE_MENU_MAX_DIMMING_SELECTED_1)
-					{
-						standalone_menu_state = STAND_ALONE_MENU_MAX_DIMMING;
-					}
-					else if (standalone_menu_state <= STAND_ALONE_MENU_MIN_DIMMING_SELECTED_1)
-					{
-						standalone_menu_state = STAND_ALONE_MENU_MIN_DIMMING;
-					}
-					else if (standalone_menu_state <= STAND_ALONE_MENU_RAMP_ON_START_SELECTED_1)
-					{
-						standalone_menu_state =STAND_ALONE_MENU_RAMP_ON_START;
-					}
-					else if (standalone_menu_state <= STAND_ALONE_MENU_RAMP_ON_DIMMING_SELECTED_1)
-					{
-						standalone_menu_state = STAND_ALONE_MENU_RAMP_ON_DIMMING;
-					}
-					FuncOptionsReset ();
-					FuncShowSelectv2Reset ();
-					FuncChangeReset ();
-				}
-				*/
 			}
 			break;
 
