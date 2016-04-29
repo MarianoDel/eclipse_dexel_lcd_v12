@@ -114,17 +114,16 @@ unsigned char FuncDMX (void)
 
 				if (ConfStruct_local.dmx_relays_usage == 1)
 				{
-					/*
-					if (ConfStruct_local.manual_ch1_value >= RELAY_START)
+					if (data[1] >= RELAY_START)
 						RELAY1_ON;
-					else if (ConfStruct_local.manual_ch1_value <= RELAY_STOP)
+					else if (data[1] <= RELAY_STOP)
 						RELAY1_OFF;
 
-					if (ConfStruct_local.manual_ch2_value >= RELAY_START)
+					if (data[2] >= RELAY_START)
 						RELAY2_ON;
-					else if (ConfStruct_local.manual_ch2_value <= RELAY_STOP)
+					else if (data[2] <= RELAY_STOP)
 						RELAY2_OFF;
-					*/
+
 				}
 				else
 				{
@@ -185,6 +184,14 @@ unsigned char FuncDMX (void)
 				sprintf(s_lcd, "%3d.%01d", one_int, one_dec);
 				Lcd_SetDDRAM(0x40 + 7);
 				LCDTransmitStr(s_lcd);
+
+				if (ConfStruct_local.dmx_relays_usage == 1)
+				{
+					if (last_ch1 >= RELAY_START)
+						RELAY1_ON;
+					else if (last_ch1 <= RELAY_STOP)
+						RELAY1_OFF;
+				}
 
 			}
 
@@ -279,6 +286,14 @@ unsigned char FuncDMX (void)
 				sprintf(s_lcd, "%3d.%01d", one_int, one_dec);
 				Lcd_SetDDRAM(0x40 + 7);
 				LCDTransmitStr(s_lcd);
+
+				if (ConfStruct_local.dmx_relays_usage == 1)
+				{
+					if (last_ch2 >= RELAY_START)
+						RELAY2_ON;
+					else if (last_ch2 <= RELAY_STOP)
+						RELAY2_OFF;
+				}
 
 			}
 

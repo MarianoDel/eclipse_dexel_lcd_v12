@@ -11,6 +11,7 @@
 #include "dmx_transceiver.h"
 #include "lcd.h"
 #include "flash_program.h"
+#include "stm32f0xx.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -92,6 +93,9 @@ unsigned char FuncColors (void)
 			Update_TIM3_CH1 (255);
 			Update_TIM3_CH2 (0);
 
+			RELAY1_ON;
+			RELAY2_OFF;
+
 			colors_state = COLORS_WAIT_TO_GO;
 			break;
 
@@ -101,6 +105,9 @@ unsigned char FuncColors (void)
 			Update_TIM3_CH1 (127);
 			Update_TIM3_CH2 (127);
 
+			RELAY1_ON;
+			RELAY2_ON;
+
 			colors_state = COLORS_WAIT_TO_GO;
 			break;
 
@@ -109,6 +116,9 @@ unsigned char FuncColors (void)
 			LCDTransmitStr((const char *) " Color in 5600K ");
 			Update_TIM3_CH1 (0);
 			Update_TIM3_CH2 (255);
+
+			RELAY1_OFF;
+			RELAY2_ON;
 
 			colors_state = COLORS_WAIT_TO_GO;
 			break;

@@ -524,6 +524,9 @@ int main(void)
 			case MAIN_INIT:
 				resp = FuncMainMenu();
 
+				RELAY1_OFF;
+				RELAY2_OFF;
+
 				if (resp == MAINMENU_SHOW_MANUAL_SELECTED)
 				{
 					main_state = MAIN_MANUAL;
