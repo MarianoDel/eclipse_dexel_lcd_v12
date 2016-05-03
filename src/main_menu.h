@@ -91,15 +91,18 @@ enum var_mainmenu_states
 #define CHANGE_PERCENT    0
 #define CHANGE_SECS		  1
 #define CHANGE_CHANNELS	  2
+#define CHANGE_ADDRESS	  3
 #define CHANGE_RESET	  0x80
 
 //wrapers de la funcion FuncChange
 #define FuncChangePercent(X)	FuncChange(X, CHANGE_PERCENT, 0, 100)
 #define FuncChangeSecs(X)		FuncChange(X, CHANGE_SECS, 0, 10)
-#define FuncChangeChannels(X)	FuncChange(X, CHANGE_CHANNELS, 1, 512)
+#define FuncChangeChannels(X)	FuncChangeThreeButtons(X, CHANGE_CHANNELS, 1, 2)
+#define FuncChangeAddress(X)	FuncChangeThreeButtons(X, CHANGE_ADDRESS, 1, 512)
 #define FuncChangePercentReset()	FuncChangeReset()
 #define FuncChangeSecsReset()	FuncChangeReset()
 #define FuncChangeChannelsReset()	FuncChangeReset()
+#define FuncChangeAddressReset()	FuncChangeReset()
 
 //-------- Functions -------------
 unsigned char FuncMainMenu (void);
@@ -111,6 +114,7 @@ unsigned char FuncScroll2 (const char *);
 unsigned char FuncShowBlink (const char * , const char * , unsigned char, unsigned char);
 //unsigned char FuncChange (unsigned char *);
 unsigned char FuncChange (unsigned short *, unsigned char , unsigned short , unsigned short );
+unsigned char FuncChangeThreeButtons (unsigned short * , unsigned char , unsigned short , unsigned short );
 
 void FuncOptionsReset (void);
 void FuncShowSelectv2Reset (void);

@@ -425,9 +425,8 @@ unsigned char FuncDMX (void)
 	}
 
 
-	//solo salgo si tengo el menu prendido y no estoy eligiendo DMX
 	//salgo del menu si no estoy eligiendo address del DMX
-	if ((CheckSSel() > S_HALF) && (dmx_menu_state != DMX_MENU_ADDRESS_SELECTED_1) && (dmx_selections != MENU_OFF))
+	if (CheckSSel() > S_HALF)
 		resp = RESP_CHANGE_ALL_UP;
 
 	//me fijo si necesito grabar si agoto el timer
@@ -456,198 +455,58 @@ unsigned char MenuDMX(void)
 	{
 		case DMX_MENU_INIT:
 			//empiezo con las selecciones
-			resp_down = FuncShowBlink ((const char *) "Starting DMX    ", (const char *) "Selections      ", 1, BLINK_NO);
-
-			if (resp_down == RESP_FINISH)
-				dmx_menu_state++;
-			break;
-
-		case DMX_MENU_ADDRESS:
-			resp_down = FuncShowSelectv2 ((const char * ) "Conf. DMX Addr  ");
-
-			if (resp_down == RESP_CHANGE_UP)	//cambio de menu
-				dmx_menu_state = DMX_MENU_CHANNELS;
-
-			if (resp_down == RESP_CHANGE_DWN)	//cambio de menu
-				dmx_menu_state = DMX_MENU_FINISH;
-
-			if (resp_down == RESP_SELECTED)	//se eligio el menu
-				dmx_menu_state = DMX_MENU_ADDRESS_SELECTED;
-
-			if (resp_down != RESP_CONTINUE)
-				resp = RESP_WORKING;
-
-			break;
-
-		case DMX_MENU_CHANNELS:
-			resp_down = FuncShowSelectv2 ((const char * ) "Conf. Channels  ");
-
-			if (resp_down == RESP_CHANGE_UP)	//cambio de menu
-				dmx_menu_state = DMX_MENU_RELAYS;
-
-			if (resp_down == RESP_CHANGE_DWN)	//cambio de menu
-				dmx_menu_state = DMX_MENU_ADDRESS;
-
-			if (resp_down == RESP_SELECTED)	//se eligio el menu
-				dmx_menu_state = DMX_MENU_CHANNELS_SELECTED;
-
-			if (resp_down != RESP_CONTINUE)
-				resp = RESP_WORKING;
-
-			break;
-
-		case DMX_MENU_RELAYS:
-			resp_down = FuncShowSelectv2 ((const char * ) "Conf. Relays use");
-
-			if (resp_down == RESP_CHANGE_UP)	//cambio de menu
-				dmx_menu_state = DMX_MENU_FINISH;
-
-			if (resp_down == RESP_CHANGE_DWN)	//cambio de menu
-				dmx_menu_state = DMX_MENU_CHANNELS;
-
-			if (resp_down == RESP_SELECTED)	//se eligio el menu
-				dmx_menu_state = DMX_MENU_RELAYS_SELECTED;
-
-			if (resp_down != RESP_CONTINUE)
-				resp = RESP_WORKING;
-
-			break;
-
-		case DMX_MENU_FINISH:
-			resp_down = FuncShowSelectv2 ((const char * ) "End Selections  ");
-
-			if (resp_down == RESP_CHANGE_UP)	//cambio de menu
-				dmx_menu_state = DMX_MENU_ADDRESS;
-
-			if (resp_down == RESP_CHANGE_DWN)	//cambio de menu
-				dmx_menu_state = DMX_MENU_RELAYS;
-
-			if (resp_down == RESP_SELECTED)	//se eligio el menu
-			{
-				LCD_1ER_RENGLON;
-				LCDTransmitStr((const char *) "Going Off       ");
-
-				resp = RESP_FINISH;
-			}
-			else if (resp_down != RESP_CONTINUE)
-				resp = RESP_WORKING;
-
-			break;
-
-		case DMX_MENU_ADDRESS_SELECTED:
-			FuncChangeChannelsReset ();
 			dmx_menu_state++;
 			break;
 
-		case DMX_MENU_ADDRESS_SELECTED_1:
-			resp_down = FuncChangeChannels ((unsigned short *) &ConfStruct_local.dmx_addr);
+		case DMX_MENU_ADDRESS_0:
+			resp_down = FuncShowBlink ((const char *) "   Select DMX   ", (const char *) "    Address     ", 1, BLINK_NO);
+
+			if ((resp_down == RESP_FINISH) && (CheckSUp() == S_NO) && (CheckSDown() == S_NO) && (CheckSSel() == S_NO))
+				dmx_menu_state++;
+			break;
+
+		case DMX_MENU_ADDRESS_1:
+			FuncChangeAddressReset ();
+			dmx_menu_state++;
+			break;
+
+		case DMX_MENU_ADDRESS_2:
+			resp_down = FuncChangeAddress ((unsigned short *) &ConfStruct_local.dmx_addr);
 
 			if (resp_down == RESP_FINISH)
 			{
 				resp = RESP_SELECTED;
-				dmx_menu_state = DMX_MENU_CHANNELS;
+				dmx_menu_state = DMX_MENU_CHANNELS_0;
 			}
 			else if (resp_down == RESP_WORKING)
 				resp = RESP_WORKING;
 
 			break;
 
-		case DMX_MENU_CHANNELS_SELECTED:
-			if (ConfStruct_local.dmx_channel_quantity == 1)
-				resp_down = 0x80;
-			else
-				resp_down = 0x81;
+		case DMX_MENU_CHANNELS_0:
+			resp_down = FuncShowBlink ((const char *) "   Select DMX   ", (const char *) "    Channels    ", 1, BLINK_NO);
 
-			FuncOptions ((const char *) "Select Channels ",(const char *) "One  Two   back ", (unsigned char *)s_sel_ch_dmx, 3, resp_down);
+			if ((resp_down == RESP_FINISH) && (CheckSUp() == S_NO) && (CheckSDown() == S_NO) && (CheckSSel() == S_NO))
+				dmx_menu_state++;
+			break;
+
+		case DMX_MENU_CHANNELS_1:
+			FuncChangeChannelsReset ();
 			dmx_menu_state++;
 			break;
 
-		case DMX_MENU_CHANNELS_SELECTED_1:
-			resp_down = FuncOptions ((const char *) "Select Channels ",(const char *) "One  Two   back ", (unsigned char *)s_sel_ch_dmx, 3, 0);
+		case DMX_MENU_CHANNELS_2:
+			resp_down = FuncChangeChannels ((unsigned short *) &ConfStruct_local.dmx_channel_quantity);
 
-			if ((resp_down & 0x0f) == RESP_SELECTED)
+			if (resp_down == RESP_FINISH)
 			{
-				resp_down = resp_down & 0xf0;
-				resp_down >>= 4;
-				if (resp_down == 0)
-				{
-					ConfStruct_local.dmx_channel_quantity = 1;
-				}
-
-				if (resp_down == 1)
-				{
-					ConfStruct_local.dmx_channel_quantity = 2;
-				}
-
-				if (resp_down == 2)
-				{
-					resp = RESP_WORKING;
-					dmx_menu_state++;
-					LCD_1ER_RENGLON;
-					LCDTransmitStr((const char *) "wait to free    ");
-				}
-				else
-				{
-					resp = RESP_SELECTED;
-					dmx_menu_state = DMX_MENU_RELAYS;	//TODO: avanzo el menu o me uedo en el mismo
-				}
+				resp = RESP_SELECTED;
+				dmx_menu_state = DMX_MENU_INIT;
+				resp = RESP_FINISH;
 			}
-			break;
+			else if (resp_down == RESP_WORKING)
+				resp = RESP_WORKING;
 
-		case DMX_MENU_CHANNELS_SELECTED_2:
-			if (CheckSSel() == S_NO)
-				dmx_menu_state = DMX_MENU_CHANNELS;
-
-			resp = RESP_WORKING;
-			break;
-
-		case DMX_MENU_RELAYS_SELECTED:
-			if (ConfStruct_local.dmx_relays_usage)
-				resp_down = 0x80;
-			else
-				resp_down = 0x81;
-
-			FuncOptions ((const char *) "on   off   back ",(const char *) s_blank_line, (unsigned char *)s_sel_dmx, 3, resp_down);
-			dmx_menu_state++;
-			break;
-
-		case DMX_MENU_RELAYS_SELECTED_1:
-			resp_down = FuncOptions ((const char *) "on   off   back ",(const char *) s_blank_line, (unsigned char *)s_sel_dmx, 3, 0);
-
-			if ((resp_down & 0x0f) == RESP_SELECTED)
-			{
-				resp_down = resp_down & 0xf0;
-				resp_down >>= 4;
-				if (resp_down == 0)
-				{
-					ConfStruct_local.dmx_relays_usage = 1;
-				}
-
-				if (resp_down == 1)
-				{
-					ConfStruct_local.dmx_relays_usage = 0;
-				}
-
-				if (resp_down == 2)
-				{
-					resp = RESP_WORKING;
-					dmx_menu_state++;
-					LCD_1ER_RENGLON;
-					LCDTransmitStr((const char *) "wait to free    ");
-				}
-				else
-				{
-					resp = RESP_SELECTED;
-					dmx_menu_state = DMX_MENU_FINISH;	//TODO: avanzo el menu o me uedo en el mismo
-				}
-			}
-			break;
-
-		case DMX_MENU_RELAYS_SELECTED_2:
-			if (CheckSSel() == S_NO)
-				dmx_menu_state = DMX_MENU_RELAYS;
-
-			resp = RESP_WORKING;
 			break;
 
 		default:

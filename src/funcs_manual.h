@@ -46,6 +46,7 @@ enum var_manual_states
 #define MANUAL_MENU_FINISH_SELECTED		16
 
 #define TT_UPDATE_BUTTON 80
+#define TT_UPDATE_BUTTON_SPEED 10
 
 //-------- Functions -------------
 unsigned char FuncManual (void);

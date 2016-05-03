@@ -33,21 +33,14 @@ enum var_dmx_states
 
 //estados del menu DMX
 #define DMX_MENU_INIT				0
-#define DMX_MENU_ADDRESS			1
-#define DMX_MENU_CHANNELS			2
-#define DMX_MENU_RELAYS				3
-#define DMX_MENU_FINISH				4
+#define DMX_MENU_ADDRESS_0			1
+#define DMX_MENU_ADDRESS_1			2
+#define DMX_MENU_ADDRESS_2			3
+#define DMX_MENU_CHANNELS_0			4
+#define DMX_MENU_CHANNELS_1			5
+#define DMX_MENU_CHANNELS_2			6
+#define DMX_MENU_FINISH				7
 
-#define DMX_MENU_ADDRESS_SELECTED		10
-#define DMX_MENU_ADDRESS_SELECTED_1		11
-#define DMX_MENU_ADDRESS_SELECTED_2		12
-#define DMX_MENU_CHANNELS_SELECTED		13
-#define DMX_MENU_CHANNELS_SELECTED_1	14
-#define DMX_MENU_CHANNELS_SELECTED_2	15
-#define DMX_MENU_RELAYS_SELECTED		16
-#define DMX_MENU_RELAYS_SELECTED_1		17
-#define DMX_MENU_RELAYS_SELECTED_2		18
-#define DMX_MENU_FINISH_SELECTED		19
 
 //-------- Functions -------------
 unsigned char FuncDMX (void);
