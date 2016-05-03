@@ -23,20 +23,20 @@ enum var_colors_states
 };
 
 //estados de Menu Selections
-#define MENU_ON			0
-#define MENU_SELECTED	1
-#define MENU_OFF		2
-#define MENU_WAIT_FREE	3
+#define MENU_C_ON			0
+#define MENU_C_SELECTED	1
+#define MENU_C_OFF		2
+#define MENU_C_WAIT_FREE	3
 
 //estados del menu COLORS
 #define COLORS_MENU_INIT				0
-#define COLORS_MENU_SELECTED			1
+#define COLORS_MENU_SELECTED_0			1
 #define COLORS_MENU_SELECTED_1			2
 #define COLORS_MENU_SELECTED_2			3
 
 
 //-------- Functions -------------
-unsigned char FuncColors (void);
+unsigned char FuncColors (unsigned char );
 unsigned char MenuColors (void);
 
 void FuncColorsReset (void);

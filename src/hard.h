@@ -189,6 +189,10 @@ enum var_main_states
 #define RELAY_START	15
 #define RELAY_STOP	10
 
+//define para los update de SCREEN
+#define UPDATE_NO	0
+#define UPDATE_YES	1
+
 //----- Definiciones para el FAN ------
 #define TIMER_FAN_ROOF	600
 #define FAN_SPEED_OFF	0

@@ -223,6 +223,7 @@ int main(void)
 	unsigned char i;
 	unsigned short current_led_temp;
 	unsigned char resp = RESP_CONTINUE;
+	unsigned char update_s = UPDATE_NO;
 
 	enum var_main_states main_state = MAIN_INIT;
 	enum var_main_states last_main_state;
@@ -282,7 +283,7 @@ int main(void)
 
 	while (FuncShowBlink ((const char *) "Kirno Technology", (const char *) "Smart Controller", 2, BLINK_NO) != RESP_FINISH);
 	LED_OFF;
-	while (FuncShowBlink ((const char *) "Hardware: V1.2  ", (const char *) "Software: V2.0  ", 1, BLINK_CROSS) != RESP_FINISH);
+	while (FuncShowBlink ((const char *) "Hardware: V1.2  ", (const char *) "Software: V2.1  ", 1, BLINK_CROSS) != RESP_FINISH);
 
 	//DE PRODUCCION Y PARA PRUEBAS EN DMX
 	Packet_Detected_Flag = 0;
@@ -516,6 +517,7 @@ int main(void)
 
 	}
 	lcd_backlight_timer = TT_LCD_BACKLIGHT;
+	update_s = UPDATE_NO;
 
 	while (1)
 	{
@@ -554,19 +556,26 @@ int main(void)
 				break;
 
 			case MAIN_DMX:
-				resp = FuncDMX();
+
+				resp = FuncDMX(update_s);
+
+				if (resp == RESP_UPDATED)		//se utiliza para refresco de screen
+					update_s = UPDATE_NO;		//generalmente luego de OVERTEMP
 
 				if (resp == RESP_CHANGE_ALL_UP)
 				{
 					FuncDMXReset();
 					main_state = MAIN_INIT;
 				}
-
 				break;
 
 			case MAIN_MANUAL:
 
-				resp = FuncManual();
+				resp = FuncManual(update_s);
+
+				if (resp == RESP_UPDATED)		//se utiliza para refresco de screen
+					update_s = UPDATE_NO;		//generalmente luego de OVERTEMP
+
 				if (resp == RESP_CHANGE_ALL_UP)
 				{
 					FuncManualReset();
@@ -576,7 +585,11 @@ int main(void)
 
 			case MAIN_COLORS:
 
-				resp = FuncColors();
+				resp = FuncColors(update_s);
+
+				if (resp == RESP_UPDATED)		//se utiliza para refresco de screen
+					update_s = UPDATE_NO;		//generalmente luego de OVERTEMP
+
 				if (resp == RESP_CHANGE_ALL_UP)
 				{
 					FuncColorsReset();
@@ -586,6 +599,10 @@ int main(void)
 
 			case MAIN_BRD_DIAG:
 				resp = FuncBrdDiag();
+
+				RELAY1_OFF;
+				RELAY2_OFF;
+
 				if (resp == RESP_CHANGE_ALL_UP)
 				{
 					FuncBrdDiagReset();
@@ -605,6 +622,7 @@ int main(void)
 				if (GetLedTemp() < TEMP_IN_65)
 				{
 					main_state = last_main_state;
+					update_s = UPDATE_YES;
 				}
 				lcd_backlight_timer = TT_LCD_BACKLIGHT;
 				break;

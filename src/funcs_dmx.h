@@ -26,10 +26,9 @@ enum var_dmx_states
 };
 
 //estados de Menu Selections
-#define MENU_ON			0
-#define MENU_SELECTED	1
-#define MENU_OFF		2
-#define MENU_WAIT_FREE	3
+#define MENU_D_ON			0
+#define MENU_D_OFF		1
+
 
 //estados del menu DMX
 #define DMX_MENU_INIT				0
@@ -43,7 +42,7 @@ enum var_dmx_states
 
 
 //-------- Functions -------------
-unsigned char FuncDMX (void);
+unsigned char FuncDMX (unsigned char);
 unsigned char MenuDMX (void);
 
 void FuncDMXReset (void);

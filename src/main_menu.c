@@ -74,8 +74,11 @@ unsigned char FuncMainMenu (void)
 			resp_down = FuncShowSelectv2((const char *) "  MANUAL DIMMER ");
 
 
+			//if (resp_down == RESP_CHANGE_DWN)
+			//	mainmenu_state = MAINMENU_SHOW_BRD_DIAG;
+
 			if (resp_down == RESP_CHANGE_DWN)
-				mainmenu_state = MAINMENU_SHOW_BRD_DIAG;
+				mainmenu_state = MAINMENU_SHOW_COLORS;
 
 			if (resp_down == RESP_CHANGE_UP)
 				mainmenu_state = MAINMENU_SHOW_DMX;
@@ -111,8 +114,11 @@ unsigned char FuncMainMenu (void)
 			if (resp_down == RESP_CHANGE_DWN)
 				mainmenu_state = MAINMENU_SHOW_DMX;
 
+			//if (resp_down == RESP_CHANGE_UP)
+			//	mainmenu_state = MAINMENU_SHOW_BRD_DIAG;
+
 			if (resp_down == RESP_CHANGE_UP)
-				mainmenu_state = MAINMENU_SHOW_BRD_DIAG;
+				mainmenu_state = MAINMENU_SHOW_MANUAL;
 
 			if (resp_down == RESP_SELECTED)
 				mainmenu_state = MAINMENU_SHOW_COLORS_SELECTED;
@@ -454,7 +460,7 @@ void FuncShowSelectv2Reset (void)
 }
 
 //funcion que muestra el string enviado en formato de menu
-//ademas v2 agrega el cont o select en el segundo renglon
+//ademas v2 agrega B1:- B2:+ B3:SEL en el segundo renglon
 unsigned char FuncShowSelectv2 (const char * p_text)
 {
 	unsigned char resp = RESP_CONTINUE;
@@ -571,6 +577,91 @@ unsigned char FuncShowSelectv2 (const char * p_text)
 				resp = RESP_CHANGE_ALL_UP;
 				show_select_state = SHOW_SELECT_INIT;
 			}
+			break;
+
+		default:
+			show_select_state = SHOW_SELECT_INIT;
+			break;
+	}
+
+	return resp;
+}
+
+//funcion que muestra el string enviado en formato de menu
+//ademas v2 agrega B1:- B2:+ B3:SEL en el segundo renglon
+//ademas v3 no traba la seleccion sino que responde al toque con lo elegido || NECESITO RESET EXTERNO
+unsigned char FuncShowSelectv3 (const char * p_text)
+{
+	unsigned char resp = RESP_CONTINUE;
+
+	switch (show_select_state)
+	{
+		case SHOW_SELECT_INIT:
+			LCD_2DO_RENGLON;
+			LCDTransmitStr((const char *) "B1:- B2:+ B3:SEL");
+			show_select_state++;
+			break;
+
+		case SHOW_SELECT_1:
+			LCD_1ER_RENGLON;
+			LCDTransmitStr(p_text);
+			show_select_timer = 1000;
+			show_select_state++;
+			break;
+
+		case SHOW_SELECT_2:
+			if (!show_select_timer)
+			{
+				LCD_1ER_RENGLON;
+				LCDTransmitStr((const char *) s_blank_line);
+				show_select_timer = 500;
+				show_select_state++;
+			}
+
+			//check s_down, s_up y s_sel
+			if (CheckSDown() > S_NO)
+				show_select_state = SHOW_SELECT_CHANGE_DWN;
+
+			if (CheckSUp() > S_NO)
+				show_select_state = SHOW_SELECT_CHANGE_UP;
+
+			if (CheckSSel() > S_NO)
+				show_select_state = SHOW_SELECT_SELECTED;
+
+			break;
+
+		case SHOW_SELECT_3:
+			if (!show_select_timer)
+			{
+				show_select_state = SHOW_SELECT_1;
+			}
+
+			//check s_down, s_up y s_sel
+			if (CheckSDown() > S_NO)
+				show_select_state = SHOW_SELECT_CHANGE_DWN;
+
+			if (CheckSUp() > S_NO)
+				show_select_state = SHOW_SELECT_CHANGE_UP;
+
+			if (CheckSSel() > S_NO)
+				show_select_state = SHOW_SELECT_SELECTED;
+
+			break;
+
+		case SHOW_SELECT_SELECTED:
+			resp = RESP_SELECTED;
+			show_select_state = SHOW_SELECT_INIT;
+			break;
+
+		case SHOW_SELECT_CHANGE_DWN:
+			show_select_state = SHOW_SELECT_INIT;
+			resp = RESP_CHANGE_DWN;
+			break;
+
+
+		case SHOW_SELECT_CHANGE_UP:
+			resp = RESP_CHANGE_UP;
+			show_select_state = SHOW_SELECT_INIT;
 			break;
 
 		default:
@@ -814,10 +905,10 @@ unsigned char FuncChange (unsigned short * p_orig_value, unsigned char mode, uns
 }
 
 //recibe el valor original para arrancar seleccion en p_orig_value
-//recibe el modo CHANGE_PERCENT, CHANGE_SECS o CHANGE_CHANNELS Ademas puede tener |CHANGE_RESET
+//recibe el modo CHANGE_CHANNELS o CHANGE_COLORS sino vuelve
 //recibe min val permitido, MAX val permitido
 //devuelve RESP_CONTINUE o RESP_FINISH si termino la seleccion
-unsigned char FuncChangeThreeButtons (unsigned short * p_orig_value, unsigned char mode, unsigned short min_val, unsigned short max_val)
+unsigned char FuncChangeThreeButtonsCHAR (unsigned char * p_orig_value, unsigned char mode, unsigned char min_val, unsigned char max_val)
 {
 	unsigned char resp = RESP_CONTINUE;
 	unsigned char resp_down = RESP_CONTINUE;
@@ -826,7 +917,15 @@ unsigned char FuncChangeThreeButtons (unsigned short * p_orig_value, unsigned ch
 	switch (change_state)
 	{
 		case CHANGE_INIT:
+
 			change_current_val = *p_orig_value;
+
+			//chequeo errores
+			if (change_current_val > max_val)
+				change_current_val = max_val;
+			else if (change_current_val < min_val)
+				change_current_val = min_val;
+
 			FuncOptionsReset();
 			change_state++;
 			break;
@@ -843,43 +942,64 @@ unsigned char FuncChangeThreeButtons (unsigned short * p_orig_value, unsigned ch
 				if (mode == CHANGE_CHANNELS)
 				{
 					if (change_current_val <= 1)
-						strcpy(s_current, (const char *) "One DMX channel ");
+					{
+						strcpy(s_current, (const char *) "Channels: 1     ");
+					}
 					else
-						strcpy(s_current, (const char *) "Two DMX channels");
+						strcpy(s_current, (const char *) "Channels: 2     ");
 				}
-				else	//debe ser ADDRESS
+				else if (mode == CHANGE_COLORS)
 				{
-					sprintf(s_current, "Address: %3d    ", change_current_val);
+					switch (change_current_val)
+					{
+						case 0:
+							strcpy(s_current, (const char *) "Set Clr to 3200K");
+							break;
+
+						case 1:
+							strcpy(s_current, (const char *) "Set Clr to 4500K");
+							break;
+
+						case 2:
+							strcpy(s_current, (const char *) "Set Clr to 5600K");
+							break;
+
+						default:
+							*p_orig_value = 2;
+							strcpy(s_current, (const char *) "Set Clr to 5600K");
+							break;
+					}
+				}
+				else
+				{
+					change_state = CHANGE_INIT;
+					return RESP_FINISH;
 				}
 
-				resp_down = FuncShowSelectv2 (s_current);
+				resp_down = FuncShowSelectv3 (s_current);
 
-				if ((resp_down & 0x0f) == RESP_SELECTED)
+				if (resp_down == RESP_CHANGE_DWN)
 				{
-					resp_down = resp_down & 0xf0;
-					resp_down >>= 4;
-					if (resp_down == 0)
-					{
-						if (change_current_val < max_val)
-							change_current_val++;
+					if (change_current_val > min_val)
+						change_current_val--;
 
-						resp = RESP_WORKING;
-					}
+					resp = RESP_WORKING;
+				}
 
-					if (resp_down == 1)
-					{
-						if (change_current_val > min_val)
-							change_current_val--;
+				if (resp_down == RESP_CHANGE_UP)
+				{
+					if (change_current_val < max_val)
+						change_current_val++;
 
-						resp = RESP_WORKING;
-					}
+					resp = RESP_WORKING;
+				}
 
-					if (resp_down == 2)
-					{
-						change_state = CHANGE_INIT;
-						resp = RESP_FINISH;
-						*p_orig_value = change_current_val;
-					}
+				if (resp_down == RESP_SELECTED)
+				{
+					change_state = CHANGE_INIT;
+					*p_orig_value = change_current_val;
+
+					resp = RESP_FINISH;
 				}
 			}
 			break;
@@ -892,6 +1012,91 @@ unsigned char FuncChangeThreeButtons (unsigned short * p_orig_value, unsigned ch
 	return resp;
 }
 
+//recibe el valor original para arrancar seleccion en p_orig_value
+//recibe el modo CHANGE_PERCENT, CHANGE_SECS o CHANGE_CHANNELS Ademas puede tener |CHANGE_RESET
+//recibe min val permitido, MAX val permitido
+//devuelve RESP_CONTINUE o RESP_FINISH si termino la seleccion
+unsigned char FuncChangeThreeButtons (unsigned short * p_orig_value, unsigned char mode, unsigned short min_val, unsigned short max_val)
+{
+	unsigned char resp = RESP_CONTINUE;
+	unsigned char resp_down = RESP_CONTINUE;
+	char s_current [20];
+
+	switch (change_state)
+	{
+		case CHANGE_INIT:
+
+			change_current_val = *p_orig_value;
+
+			//chequeo errores
+			if (change_current_val > max_val)
+				change_current_val = max_val;
+			else if (change_current_val < min_val)
+				change_current_val = min_val;
+
+			FuncOptionsReset();
+			change_state++;
+			break;
+
+		case CHANGE_WAIT_SELECT:
+			if (!scroll2_timer)		//timer para que la seleccion sea un poco mas lenta
+			{						//pero si tuvo mucho tiempo apretado lo acelero al triple
+				if ((CheckSUp() > S_HALF) || (CheckSDown() > S_HALF))
+					scroll2_timer = TT_UPDATE_BUTTON_SPEED;
+				else
+					scroll2_timer = TT_UPDATE_BUTTON;
+
+				memset(s_current, ' ', sizeof(s_current));
+				if (mode == CHANGE_CHANNELS)
+				{
+					if (change_current_val <= 1)
+					{
+						strcpy(s_current, (const char *) "Channels: 1     ");
+						change_current_val = 1;
+					}
+					else
+						strcpy(s_current, (const char *) "Channels: 2     ");
+				}
+				else	//debe ser ADDRESS
+				{
+					sprintf(s_current, "Address: %3d    ", change_current_val);
+				}
+
+				resp_down = FuncShowSelectv3 (s_current);
+
+				if (resp_down == RESP_CHANGE_DWN)
+				{
+					if (change_current_val > min_val)
+						change_current_val--;
+
+					resp = RESP_WORKING;
+				}
+
+				if (resp_down == RESP_CHANGE_UP)
+				{
+					if (change_current_val < max_val)
+						change_current_val++;
+
+					resp = RESP_WORKING;
+				}
+
+				if (resp_down == RESP_SELECTED)
+				{
+					change_state = CHANGE_INIT;
+					*p_orig_value = change_current_val;
+
+					resp = RESP_FINISH;
+				}
+			}
+			break;
+
+		default:
+			change_state = CHANGE_INIT;
+			break;
+	}
+
+	return resp;
+}
 
 void FuncChangeReset (void)
 {

@@ -26,30 +26,21 @@ enum var_manual_states
 };
 
 //estados de Menu Selections
-#define MENU_ON			0
-#define MENU_SELECTED	1
-#define MENU_OFF		2
-#define MENU_WAIT_FREE	3
+#define MENU_M_ON			0
+#define MENU_M_OFF		1
 
 //estados del menu MANUAL
 #define MANUAL_MENU_INIT				0
-#define MANUAL_MENU_CHANNELS			1
-#define MANUAL_MENU_RELAYS				2
-#define MANUAL_MENU_FINISH				3
+#define MANUAL_MENU_CHANNELS_0			1
+#define MANUAL_MENU_CHANNELS_1			2
+#define MANUAL_MENU_CHANNELS_2			3
 
-#define MANUAL_MENU_CHANNELS_SELECTED	10
-#define MANUAL_MENU_CHANNELS_SELECTED_1	11
-#define MANUAL_MENU_CHANNELS_SELECTED_2	12
-#define MANUAL_MENU_RELAYS_SELECTED		13
-#define MANUAL_MENU_RELAYS_SELECTED_1	14
-#define MANUAL_MENU_RELAYS_SELECTED_2	15
-#define MANUAL_MENU_FINISH_SELECTED		16
 
 #define TT_UPDATE_BUTTON 80
 #define TT_UPDATE_BUTTON_SPEED 10
 
 //-------- Functions -------------
-unsigned char FuncManual (void);
+unsigned char FuncManual (unsigned char);
 unsigned char MenuManual (void);
 
 void FuncManualReset (void);

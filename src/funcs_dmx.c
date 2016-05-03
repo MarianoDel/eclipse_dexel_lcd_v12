@@ -78,7 +78,7 @@ unsigned char last_ch1;
 unsigned char last_ch2;
 
 //-------- Functions -------------
-unsigned char FuncDMX (void)
+unsigned char FuncDMX (unsigned char update_screen)
 {
 	unsigned char resp = RESP_CONTINUE;
 	unsigned char resp_down = RESP_CONTINUE;
@@ -86,11 +86,10 @@ unsigned char FuncDMX (void)
 	short one_int, one_dec;
 	char s_lcd [20];
 
-	//----------------- PARA PRUEBAS DEL MENU ----------------//
-	/*
-	resp_down = MenuDMX();
-	*/
-	//----------------- FIN PARA PRUEBAS DEL MENU ------------//
+	if (update_screen == UPDATE_YES)
+	{
+		dmx_state = DMX_UPDATE;
+	}
 
 
 	switch (dmx_state)
@@ -100,43 +99,49 @@ unsigned char FuncDMX (void)
 			DMX_Ena();
 			MenuDMXReset();
 			dmx_state = DMX_UPDATE;
+			dmx_selections = MENU_D_ON;
 			RELAY1_OFF;
 			RELAY2_OFF;
 			break;
 
 		case DMX_UPDATE:		//es un paso adelante, toda la info ya esta en memoria updated
-			if (dmx_selections == MENU_OFF)
+			if (dmx_selections == MENU_D_OFF)
 			{
 				dmx_state++;
 
 				DMX_channel_selected = ConfStruct_local.dmx_addr;
 				DMX_channel_quantity = ConfStruct_local.dmx_channel_quantity;
 
-				if (ConfStruct_local.dmx_relays_usage == 1)
-				{
-					if (data[1] >= RELAY_START)
-						RELAY1_ON;
-					else if (data[1] <= RELAY_STOP)
-						RELAY1_OFF;
+				if (data[1] >= RELAY_START)
+					RELAY1_ON;
+				else if (data[1] <= RELAY_STOP)
+					RELAY1_OFF;
 
+				if (ConfStruct_local.dmx_channel_quantity > 1)
+				{
 					if (data[2] >= RELAY_START)
 						RELAY2_ON;
 					else if (data[2] <= RELAY_STOP)
 						RELAY2_OFF;
-
 				}
 				else
-				{
-					RELAY1_OFF;
 					RELAY2_OFF;
-				}
+
 				last_ch1 = 0;
 				last_ch2 = 0;
 
-				//se cambio algo pido que se grabe
-				dmx_save_memory_timer = TT_SAVE_MEMORY;
-				dmx_save_memory = 1;
-
+				if (update_screen != UPDATE_YES)
+				{
+					//se cambio algo pido que se grabe
+					dmx_save_memory_timer = TT_SAVE_MEMORY;
+					dmx_save_memory = 1;
+				}
+				else
+				{
+					//es solo un update de screen, probablemente despues de OVERTEMP
+					update_screen = UPDATE_NO;
+					resp = RESP_UPDATED;
+				}
 			}
 			break;
 
@@ -156,18 +161,18 @@ unsigned char FuncDMX (void)
 			{
 				 DMX_packet_flag = 0;
 
-				 //en data tengo la info
+				 lcd_backlight_timer = TT_LCD_BACKLIGHT;
+
+				 //en data tengo la info CH1 funciona siempre CH2 reviso si debe funcionar
 				 if (last_ch1 != data[1])
 				 {
 					 last_ch1 = data[1];
 					 dmx_need_a_change = 1;
-					 //TODO: cargar al filtro
 				 }
-				 else if (last_ch2 != data[2])
+				 else if ((ConfStruct_local.dmx_channel_quantity > 1) && (last_ch2 != data[2]))
 				 {
 					 last_ch2 = data[2];
 					 dmx_state = DMX_CH2;
-					 //TODO: cargar al filtro
 				 }
 			}
 
@@ -185,13 +190,10 @@ unsigned char FuncDMX (void)
 				Lcd_SetDDRAM(0x40 + 7);
 				LCDTransmitStr(s_lcd);
 
-				if (ConfStruct_local.dmx_relays_usage == 1)
-				{
-					if (last_ch1 >= RELAY_START)
-						RELAY1_ON;
-					else if (last_ch1 <= RELAY_STOP)
-						RELAY1_OFF;
-				}
+				if (last_ch1 >= RELAY_START)
+					RELAY1_ON;
+				else if (last_ch1 <= RELAY_STOP)
+					RELAY1_OFF;
 
 			}
 
@@ -217,7 +219,7 @@ unsigned char FuncDMX (void)
 			}
 
 			//si el menu no esta apagado vuelvo
-			if (dmx_selections != MENU_OFF)
+			if (dmx_selections != MENU_D_OFF)
 				dmx_state = DMX_UPDATE;
 
 			break;
@@ -287,13 +289,10 @@ unsigned char FuncDMX (void)
 				Lcd_SetDDRAM(0x40 + 7);
 				LCDTransmitStr(s_lcd);
 
-				if (ConfStruct_local.dmx_relays_usage == 1)
-				{
-					if (last_ch2 >= RELAY_START)
-						RELAY2_ON;
-					else if (last_ch2 <= RELAY_STOP)
-						RELAY2_OFF;
-				}
+				if (last_ch2 >= RELAY_START)
+					RELAY2_ON;
+				else if (last_ch2 <= RELAY_STOP)
+					RELAY2_OFF;
 
 			}
 
@@ -303,7 +302,7 @@ unsigned char FuncDMX (void)
 			}
 
 			//si el menu no esta apagado vuelvo
-			if (dmx_selections != MENU_OFF)
+			if (dmx_selections != MENU_D_OFF)
 				dmx_state = DMX_UPDATE;
 
 			break;
@@ -331,7 +330,7 @@ unsigned char FuncDMX (void)
 			if (CheckSSel() == S_NO)
 			{
 				MenuDMXReset();
-				dmx_selections = MENU_ON;
+				dmx_selections = MENU_D_ON;
 				dmx_state = DMX_UPDATE;
 				dmx_enable_menu_timer = TT_MENU_ENABLED;
 			}
@@ -354,7 +353,7 @@ unsigned char FuncDMX (void)
 	//veo el de configuracion hasta TT_MENU_ENABLED
 	switch (dmx_selections)
 	{
-		case MENU_ON:
+		case MENU_D_ON:
 
 			resp_down = MenuDMX();
 
@@ -364,20 +363,13 @@ unsigned char FuncDMX (void)
 				lcd_backlight_timer = TT_LCD_BACKLIGHT;
 			}
 
-			if (resp_down == RESP_SELECTED)	//se selecciono algo
-			{
-				dmx_enable_menu_timer = TT_MENU_ENABLED;
-				lcd_backlight_timer = TT_LCD_BACKLIGHT;
-				dmx_selections = MENU_SELECTED;
-			}
-
 			if (!dmx_enable_menu_timer)	//ya mostre el menu mucho tiempo, lo apago
 			{
 				LCD_1ER_RENGLON;
 				LCDTransmitStr((const char *)s_blank_line);
 				LCD_2DO_RENGLON;
 				LCDTransmitStr((const char *)s_blank_line);
-				dmx_selections = MENU_OFF;
+				dmx_selections = MENU_D_OFF;
 			}
 
 			if (resp_down == RESP_FINISH)	//se terminaron las selecciones
@@ -389,37 +381,19 @@ unsigned char FuncDMX (void)
 				LCDTransmitStr((const char *)s_blank_line);
 
 				lcd_backlight_timer = TT_LCD_BACKLIGHT;
-				dmx_selections = MENU_OFF;
+				dmx_selections = MENU_D_OFF;
 			}
 			break;
 
-		case MENU_SELECTED:
-			//estado algo seleccionado espero update
-			resp_down = FuncShowBlink ((const char *) "Something Select", (const char *) "Updating Values", 1, BLINK_NO);
-
-			if (resp_down == RESP_FINISH)
-			{
-				dmx_state = DMX_UPDATE;
-				dmx_selections = MENU_ON;
-			}
-			break;
-
-		case MENU_OFF:
+		case MENU_D_OFF:
 			//si alguien toco un control prendo el lcd_backlight
 			if ((CheckSUp() > S_NO) || (CheckSDown() > S_NO) || (CheckSSel() > S_NO))
 				lcd_backlight_timer = TT_LCD_BACKLIGHT;
 
 			break;
 
-		case MENU_WAIT_FREE:
-			if (CheckSSel() == S_NO)
-			{
-				dmx_selections = MENU_ON;
-			}
-			break;
-
 		default:
-			dmx_selections = MENU_ON;
+			dmx_selections = MENU_D_ON;
 			dmx_enable_menu_timer = TT_MENU_ENABLED;
 			break;
 	}
@@ -427,17 +401,23 @@ unsigned char FuncDMX (void)
 
 	//salgo del menu si no estoy eligiendo address del DMX
 	if (CheckSSel() > S_HALF)
+	{
+		FuncDMXReset();
 		resp = RESP_CHANGE_ALL_UP;
+	}
+
 
 	//me fijo si necesito grabar si agoto el timer
 	if (!dmx_save_memory_timer)
 	{
 		if (dmx_save_memory)	//y necesito grabar
 		{
+			LED_ON;
 			DMX_Disa();
 			dmx_save_memory = 0;
 			WriteConfigurations();
 			DMX_Ena();
+			LED_OFF;
 		}
 	}
 
@@ -475,7 +455,7 @@ unsigned char MenuDMX(void)
 
 			if (resp_down == RESP_FINISH)
 			{
-				resp = RESP_SELECTED;
+				resp = RESP_WORKING;
 				dmx_menu_state = DMX_MENU_CHANNELS_0;
 			}
 			else if (resp_down == RESP_WORKING)
@@ -496,11 +476,10 @@ unsigned char MenuDMX(void)
 			break;
 
 		case DMX_MENU_CHANNELS_2:
-			resp_down = FuncChangeChannels ((unsigned short *) &ConfStruct_local.dmx_channel_quantity);
+			resp_down = FuncChangeChannels ((unsigned char *) &ConfStruct_local.dmx_channel_quantity);
 
 			if (resp_down == RESP_FINISH)
 			{
-				resp = RESP_SELECTED;
 				dmx_menu_state = DMX_MENU_INIT;
 				resp = RESP_FINISH;
 			}

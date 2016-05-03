@@ -50,10 +50,15 @@ const unsigned char s_sel_colors [] = { 0x05, 0x0e, 0x45, 0x4e };
 
 //muestro el menu y hago funciones (pero sin mostrar nada) hasta que pasen 30 segs de TT_MENU_ENABLED
 //con func_menu_show
-unsigned char FuncColors (void)
+unsigned char FuncColors (unsigned char update_screen)
 {
 	unsigned char resp = RESP_CONTINUE;
 	unsigned char resp_down = RESP_CONTINUE;
+
+	if (update_screen == UPDATE_YES)
+	{
+		colors_state = COLORS_UPDATE;
+	}
 
 	switch (colors_state)
 	{
@@ -62,12 +67,13 @@ unsigned char FuncColors (void)
 			DMX_Disa();
 			MenuColorsReset();
 			colors_state = COLORS_UPDATE;
-			if (colors_enable_menu_timer)
-				colors_selections = MENU_ON;
+			colors_selections = MENU_C_ON;
+			RELAY1_OFF;
+			RELAY2_OFF;
 			break;
 
 		case COLORS_UPDATE:
-			if (colors_selections == MENU_OFF)
+			if (colors_selections == MENU_C_OFF)
 			{
 				if (ConfStruct_local.colors_selected == 0)
 					colors_state = COLORS_3200;
@@ -79,11 +85,18 @@ unsigned char FuncColors (void)
 				LCD_1ER_RENGLON;
 				LCDTransmitStr((const char *) " DEXEL LIGHTING ");
 
-				//se cambio algo pido que se grabe
-				colors_save_memory_timer = TT_SAVE_MEMORY;
-				colors_save_memory = 1;
-
-
+				if (update_screen != UPDATE_YES)
+				{
+					//se cambio algo pido que se grabe
+					colors_save_memory_timer = TT_SAVE_MEMORY;
+					colors_save_memory = 1;
+				}
+				else
+				{
+					//es solo un update de screen, probablemente despues de OVERTEMP
+					update_screen = UPDATE_NO;
+					resp = RESP_UPDATED;
+				}
 			}
 			break;
 
@@ -141,7 +154,7 @@ unsigned char FuncColors (void)
 			if (CheckSSel() == S_NO)
 			{
 				MenuColorsReset();
-				colors_selections = MENU_ON;
+				colors_selections = MENU_C_ON;
 				colors_state = COLORS_UPDATE;
 				colors_enable_menu_timer = TT_MENU_ENABLED;
 			}
@@ -155,7 +168,7 @@ unsigned char FuncColors (void)
 	//veo el de configuracion hasta TT_MENU_ENABLED
 	switch (colors_selections)
 	{
-		case MENU_ON:
+		case MENU_C_ON:
 
 			resp_down = MenuColors();
 
@@ -165,20 +178,13 @@ unsigned char FuncColors (void)
 				lcd_backlight_timer = TT_LCD_BACKLIGHT;
 			}
 
-			if (resp_down == RESP_SELECTED)	//se selecciono algo
-			{
-				colors_enable_menu_timer = TT_MENU_ENABLED;
-				lcd_backlight_timer = TT_LCD_BACKLIGHT;
-				colors_selections = MENU_SELECTED;
-			}
-
 			if (!colors_enable_menu_timer)	//ya mostre el menu mucho tiempo, lo apago
 			{
 				LCD_1ER_RENGLON;
 				LCDTransmitStr((const char *)s_blank_line);
 				LCD_2DO_RENGLON;
 				LCDTransmitStr((const char *)s_blank_line);
-				colors_selections = MENU_OFF;
+				colors_selections = MENU_C_OFF;
 			}
 
 			if (resp_down == RESP_FINISH)	//se terminaron las selecciones
@@ -190,7 +196,7 @@ unsigned char FuncColors (void)
 				LCDTransmitStr((const char *)s_blank_line);
 
 				lcd_backlight_timer = TT_LCD_BACKLIGHT;
-				colors_selections = MENU_OFF;
+				colors_selections = MENU_C_OFF;
 			}
 
 			if (resp_down == RESP_CHANGE_ALL_UP)	//se terminaron las selecciones
@@ -198,40 +204,23 @@ unsigned char FuncColors (void)
 
 			break;
 
-		case MENU_SELECTED:
-			//estado algo seleccionado espero update
-			resp_down = FuncShowBlink ((const char *) "Something Select", (const char *) "Updating Values", 1, BLINK_NO);
-
-			if (resp_down == RESP_FINISH)
-			{
-				colors_state = COLORS_UPDATE;
-				colors_selections = MENU_ON;
-			}
-			break;
-
-		case MENU_OFF:
+		case MENU_C_OFF:
 			//si alguien toco un control prendo el lcd_backlight
 			if ((CheckSUp() > S_NO) || (CheckSDown() > S_NO) || (CheckSSel() > S_NO))
 				lcd_backlight_timer = TT_LCD_BACKLIGHT;
 
 			break;
 
-		case MENU_WAIT_FREE:
-			if (CheckSSel() == S_NO)
-			{
-				colors_selections = MENU_ON;
-			}
-			break;
-
 		default:
-			colors_selections = MENU_ON;
+			colors_selections = MENU_C_ON;
 			colors_enable_menu_timer = TT_MENU_ENABLED;
 			break;
 	}
 
 	//salgo solo si estoy con el menu prendido
-	if ((CheckSSel() > S_HALF) && (colors_selections != MENU_OFF))
+	if (CheckSSel() > S_HALF)
 	{
+		FuncColorsReset();
 		resp = RESP_CHANGE_ALL_UP;
 	}
 
@@ -240,9 +229,10 @@ unsigned char FuncColors (void)
 	{
 		if (colors_save_memory)	//y necesito grabar
 		{
+			LED_ON;
 			colors_save_memory = 0;
 			WriteConfigurations();
-
+			LED_OFF;
 		}
 	}
 
@@ -253,73 +243,38 @@ unsigned char MenuColors(void)
 {
 	unsigned char resp = RESP_CONTINUE;
 	unsigned char resp_down = RESP_CONTINUE;
-	//unsigned char dummy = 0;
 
 	switch (colors_menu_state)
 	{
 		case COLORS_MENU_INIT:
 			//empiezo con las selecciones
-			resp_down = FuncShowBlink ((const char *) "Starting Colors ", (const char *) "Selections      ", 1, BLINK_NO);
-
-			if (resp_down == RESP_FINISH)
-				colors_menu_state++;
-			break;
-
-		case COLORS_MENU_SELECTED:
-			if (ConfStruct_local.colors_selected == 0)
-				resp_down = 0x80;
-			else if (ConfStruct_local.colors_selected == 1)
-				resp_down = 0x81;
-			else
-				resp_down = 0x82;
-
-			FuncOptions ((const char *) "3200K    4500K  ",(const char *) "5600K     back  ", (unsigned char *)s_sel_colors, 4, resp_down);
 			colors_menu_state++;
 			break;
 
-		case COLORS_MENU_SELECTED_1:
+		case COLORS_MENU_SELECTED_0:
+			resp_down = FuncShowBlink ((const char *) "Starting Colors ", (const char *) "   Selections   ", 1, BLINK_NO);
 
-			resp_down = FuncOptions ((const char *) "3200K    4500K  ",(const char *) "5600K     back  ", (unsigned char *)s_sel_colors, 4, 0);
+			if ((resp_down == RESP_FINISH) && (CheckSUp() == S_NO) && (CheckSDown() == S_NO) && (CheckSSel() == S_NO))
+				colors_menu_state++;
 
-			if ((resp_down & 0x0f) == RESP_SELECTED)
-			{
-				resp_down = resp_down & 0xf0;
-				resp_down >>= 4;
-				if (resp_down == 0)
-				{
-					ConfStruct_local.colors_selected = 0;
-				}
-
-				if (resp_down == 1)
-				{
-					ConfStruct_local.colors_selected = 1;
-				}
-
-				if (resp_down == 2)
-				{
-					ConfStruct_local.colors_selected = 2;
-				}
-
-				if (resp_down == 3)
-				{
-					resp = RESP_WORKING;
-					colors_menu_state++;
-					LCD_1ER_RENGLON;
-					LCDTransmitStr((const char *) "wait to free    ");
-				}
-				else
-				{
-					resp = RESP_FINISH;
-					colors_menu_state = COLORS_MENU_INIT;
-				}
-			}
 			break;
 
-		case COLORS_MENU_SELECTED_2:	//esto es back voy al menu principal
-			if (CheckSSel() == S_NO)
-				colors_menu_state = COLORS_MENU_INIT;
+		case COLORS_MENU_SELECTED_1:
+			FuncChangeColorsReset ();
+			colors_menu_state++;
+			break;
 
-			resp = RESP_CHANGE_ALL_UP;
+		case COLORS_MENU_SELECTED_2:
+			resp_down = FuncChangeColors ((unsigned char *) &ConfStruct_local.colors_selected);
+
+			if (resp_down == RESP_FINISH)
+			{
+				colors_menu_state = COLORS_MENU_INIT;
+				resp = RESP_FINISH;
+			}
+			else if (resp_down == RESP_WORKING)
+				resp = RESP_WORKING;
+
 			break;
 
 		default:

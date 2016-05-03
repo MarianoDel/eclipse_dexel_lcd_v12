@@ -40,6 +40,7 @@ enum var_mainmenu_states
 #define RESP_YES			11
 #define RESP_NO				12
 #define RESP_NO_CHANGE		13
+#define RESP_UPDATED		14
 
 
 //estados de la funcion SHOW SELECT
@@ -92,22 +93,26 @@ enum var_mainmenu_states
 #define CHANGE_SECS		  1
 #define CHANGE_CHANNELS	  2
 #define CHANGE_ADDRESS	  3
+#define CHANGE_COLORS	  4
 #define CHANGE_RESET	  0x80
 
 //wrapers de la funcion FuncChange
-#define FuncChangePercent(X)	FuncChange(X, CHANGE_PERCENT, 0, 100)
-#define FuncChangeSecs(X)		FuncChange(X, CHANGE_SECS, 0, 10)
-#define FuncChangeChannels(X)	FuncChangeThreeButtons(X, CHANGE_CHANNELS, 1, 2)
-#define FuncChangeAddress(X)	FuncChangeThreeButtons(X, CHANGE_ADDRESS, 1, 512)
+#define FuncChangePercent(X)		FuncChange(X, CHANGE_PERCENT, 0, 100)
+#define FuncChangeSecs(X)			FuncChange(X, CHANGE_SECS, 0, 10)
+#define FuncChangeChannels(X)		FuncChangeThreeButtonsCHAR(X, CHANGE_CHANNELS, 1, 2)
+#define FuncChangeColors(X)			FuncChangeThreeButtonsCHAR(X, CHANGE_COLORS, 0, 2)
+#define FuncChangeAddress(X)		FuncChangeThreeButtons(X, CHANGE_ADDRESS, 1, 512)
 #define FuncChangePercentReset()	FuncChangeReset()
-#define FuncChangeSecsReset()	FuncChangeReset()
+#define FuncChangeSecsReset()		FuncChangeReset()
 #define FuncChangeChannelsReset()	FuncChangeReset()
 #define FuncChangeAddressReset()	FuncChangeReset()
+#define FuncChangeColorsReset()		FuncChangeReset()
 
 //-------- Functions -------------
 unsigned char FuncMainMenu (void);
 unsigned char FuncShowSelect (const char *);
 unsigned char FuncShowSelectv2 (const char *);
+unsigned char FuncShowSelectv3 (const char *);
 unsigned char FuncOptions (const char *, const char *, unsigned char *, unsigned char, unsigned char);
 unsigned char FuncScroll1 (const char *);
 unsigned char FuncScroll2 (const char *);
@@ -115,6 +120,7 @@ unsigned char FuncShowBlink (const char * , const char * , unsigned char, unsign
 //unsigned char FuncChange (unsigned char *);
 unsigned char FuncChange (unsigned short *, unsigned char , unsigned short , unsigned short );
 unsigned char FuncChangeThreeButtons (unsigned short * , unsigned char , unsigned short , unsigned short );
+unsigned char FuncChangeThreeButtonsCHAR (unsigned char * , unsigned char , unsigned char , unsigned char );
 
 void FuncOptionsReset (void);
 void FuncShowSelectv2Reset (void);
