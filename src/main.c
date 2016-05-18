@@ -283,7 +283,7 @@ int main(void)
 
 	while (FuncShowBlink ((const char *) "Kirno Technology", (const char *) "Smart Controller", 2, BLINK_NO) != RESP_FINISH);
 	LED_OFF;
-	while (FuncShowBlink ((const char *) "Hardware: V1.2  ", (const char *) "Software: V2.1  ", 1, BLINK_CROSS) != RESP_FINISH);
+	while (FuncShowBlink ((const char *) "Hardware: V1.2  ", (const char *) "Software: V2.2  ", 1, BLINK_CROSS) != RESP_FINISH);
 
 	//DE PRODUCCION Y PARA PRUEBAS EN DMX
 	Packet_Detected_Flag = 0;
@@ -637,17 +637,28 @@ int main(void)
 		if (main_state != MAIN_OVERTEMP_1)
 		{
 			current_led_temp = GetLedTemp();
-			if (current_led_temp > TEMP_IN_65)
+			if (current_led_temp > TEMP_IN_70)
 			{
 				last_main_state = main_state;
 				main_state = MAIN_OVERTEMP;
 				SetPWMFan(FAN_SPEED_HIGH);
+
+				//apago los releys y los 1 a 10V
+				RELAY1_OFF;
+				RELAY2_OFF;
+
+				Update_TIM3_CH1 (0);
+				Update_TIM3_CH2 (0);
 			}
+			else if (current_led_temp > TEMP_IN_65)
+				SetPWMFan(FAN_SPEED_HIGH);
 			else if (current_led_temp > TEMP_IN_50)
-				SetPWMFan(FAN_SPEED_MED);
-			else if (current_led_temp > TEMP_IN_35)
-				SetPWMFan(FAN_SPEED_LOW);
-			else
+				//SetPWMFan(FAN_SPEED_MED);
+				SetPWMFan(FAN_SPEED_HIGH);
+			else if (current_led_temp > TEMP_IN_45)
+				//SetPWMFan(FAN_SPEED_LOW);
+				SetPWMFan(FAN_SPEED_HIGH);
+			else if (current_led_temp < TEMP_IN_35)		//le pongo histeresis
 				SetPWMFan(FAN_SPEED_OFF);
 
 		}

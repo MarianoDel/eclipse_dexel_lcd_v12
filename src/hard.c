@@ -71,10 +71,15 @@ void UpdateSwitches (void)
 void UpdateFan (void)
 {
 	//armo un PWM
-	if (timer_fan_freerun < pwm_fan)
+	if (pwm_fan == TIMER_FAN_ROOF)
 		FAN_ON;
 	else
-		FAN_OFF;
+	{
+		if (timer_fan_freerun < pwm_fan)
+			FAN_ON;
+		else
+			FAN_OFF;
+	}
 }
 
 void UpdateLCDBackLight (void)

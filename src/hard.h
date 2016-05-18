@@ -153,10 +153,14 @@ enum var_main_states
 //50	2,681
 //55	2,725
 //60	2,765
-#define TEMP_IN_30		3226
-#define TEMP_IN_35		3279
-#define TEMP_IN_50		3434
-#define TEMP_IN_65		3591
+#define TEMP_IN_30		3125
+//#define TEMP_IN_35		3169	//2.555 V
+#define TEMP_IN_35		3135	//2.555 V corrijo para cuando baja muy rapido
+#define TEMP_IN_45		3258	//2.62 V
+#define TEMP_IN_50		3302	//2.66 V
+#define TEMP_IN_55		3346	//2.69
+#define TEMP_IN_65		3434	//2.7678 V
+#define TEMP_IN_70		3484	//2.8083
 #define TEMP_DISCONECT		4000
 
 //ESTADOS DEL DISPLAY EN RGB_FOR_CAT
@@ -200,6 +204,11 @@ enum var_main_states
 #define FAN_SPEED_MED	400
 #define FAN_SPEED_HIGH	TIMER_FAN_ROOF
 
+//#define TIMER_FAN_ROOF	20
+//#define FAN_SPEED_OFF	0
+//#define FAN_SPEED_LOW	6
+//#define FAN_SPEED_MED	12
+//#define FAN_SPEED_HIGH	TIMER_FAN_ROOF
 
 
 

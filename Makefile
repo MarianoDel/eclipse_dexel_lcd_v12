@@ -50,7 +50,7 @@ DLIBS =
  
 #
 # Define project name and Ram = 0/Flash = 1 mode here
-PROJECT        = Template_F050
+PROJECT        = Dexel_LCD_2CH_F050
 RUN_FROM_FLASH = 1
  
 # List all user C define here, like -D_DEBUG=1
