@@ -283,7 +283,7 @@ int main(void)
 
 	while (FuncShowBlink ((const char *) "Kirno Technology", (const char *) "Smart Controller", 2, BLINK_NO) != RESP_FINISH);
 	LED_OFF;
-	while (FuncShowBlink ((const char *) "Hardware: V1.2  ", (const char *) "Software: V2.2  ", 1, BLINK_CROSS) != RESP_FINISH);
+	while (FuncShowBlink ((const char *) "Hardware: V1.2  ", (const char *) "Software: V2.3  ", 1, BLINK_CROSS) != RESP_FINISH);
 
 	//DE PRODUCCION Y PARA PRUEBAS EN DMX
 	Packet_Detected_Flag = 0;

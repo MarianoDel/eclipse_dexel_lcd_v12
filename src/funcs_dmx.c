@@ -148,8 +148,12 @@ unsigned char FuncDMX (unsigned char update_screen)
 		case DMX_CH1:
 			LCD_1ER_RENGLON;
 			LCDTransmitStr((const char *) " DEXEL LIGHTING ");
+			sprintf(s_lcd, "Ch: %3i", ConfStruct_local.dmx_addr);
 			LCD_2DO_RENGLON;
-			LCDTransmitStr((const char *) "Ch: 1       %  D");
+			LCDTransmitStr(s_lcd);
+			Lcd_SetDDRAM(0x40 + 7);
+			LCDTransmitStr((const char *) "      % D");
+
 			dmx_state = DMX_CH1_1;
 			dmx_need_a_change = 1;
 			break;
@@ -187,7 +191,7 @@ unsigned char FuncDMX (unsigned char update_screen)
 				one_dec = (short) fcalc;
 
 				sprintf(s_lcd, "%3d.%01d", one_int, one_dec);
-				Lcd_SetDDRAM(0x40 + 7);
+				Lcd_SetDDRAM(0x40 + 8);
 				LCDTransmitStr(s_lcd);
 
 				if (last_ch1 >= RELAY_START)
@@ -246,8 +250,11 @@ unsigned char FuncDMX (unsigned char update_screen)
 		case DMX_CH2:
 			LCD_1ER_RENGLON;
 			LCDTransmitStr((const char *) " DEXEL LIGHTING ");
+			sprintf(s_lcd, "Ch: %3i", ConfStruct_local.dmx_addr + 1);
 			LCD_2DO_RENGLON;
-			LCDTransmitStr((const char *) "Ch: 2       %  D");
+			LCDTransmitStr(s_lcd);
+			Lcd_SetDDRAM(0x40 + 7);
+			LCDTransmitStr((const char *) "      % D");
 			dmx_state = DMX_CH2_1;
 			dmx_need_a_change = 1;
 			break;
@@ -286,7 +293,7 @@ unsigned char FuncDMX (unsigned char update_screen)
 				one_dec = (short) fcalc;
 
 				sprintf(s_lcd, "%3d.%01d", one_int, one_dec);
-				Lcd_SetDDRAM(0x40 + 7);
+				Lcd_SetDDRAM(0x40 + 8);
 				LCDTransmitStr(s_lcd);
 
 				if (last_ch2 >= RELAY_START)
