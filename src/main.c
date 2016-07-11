@@ -784,7 +784,8 @@ void EXTI4_15_IRQHandler(void)
 						//reviso BREAK
 						//if (((tim_counter_65ms) || (aux > 88)) && (tim_counter_65ms <= 20))
 						//if ((aux > 87) && (aux < 210))	//Consola STARLET 6
-						if ((aux > 87) && (aux < 2000))		//Consola marca CODE tiene break 1.88ms
+						//if ((aux > 87) && (aux < 2000))		//Consola marca CODE tiene break 1.88ms
+						if ((aux > 87) && (aux < 4600))		//Consola marca CODE modelo A24 tiene break 4.48ms fecha 11-07-16
 						{
 							LED_ON;
 							//Activo timer para ver MARK.
