@@ -147,12 +147,19 @@ unsigned char FuncDMX (unsigned char update_screen)
 
 		case DMX_CH1:
 			LCD_1ER_RENGLON;
-			LCDTransmitStr((const char *) " DEXEL LIGHTING ");
-			sprintf(s_lcd, "Ch: %3i", ConfStruct_local.dmx_addr);
+//			LCDTransmitStr((const char *) " DEXEL LIGHTING ");
+//			sprintf(s_lcd, "Ch: %3i", ConfStruct_local.dmx_addr);
+//			LCD_2DO_RENGLON;
+//			LCDTransmitStr(s_lcd);
+//			Lcd_SetDDRAM(0x40 + 7);
+//			LCDTransmitStr((const char *) "      % D");
+
+			LCDTransmitStr((const char *) "DEXEL LIGHTING C");
+			sprintf(s_lcd, "DMX:%03i", ConfStruct_local.dmx_addr);
 			LCD_2DO_RENGLON;
 			LCDTransmitStr(s_lcd);
 			Lcd_SetDDRAM(0x40 + 7);
-			LCDTransmitStr((const char *) "      % D");
+			LCDTransmitStr((const char *) "      % 1");
 
 			dmx_state = DMX_CH1_1;
 			dmx_need_a_change = 1;
@@ -249,12 +256,20 @@ unsigned char FuncDMX (unsigned char update_screen)
 
 		case DMX_CH2:
 			LCD_1ER_RENGLON;
-			LCDTransmitStr((const char *) " DEXEL LIGHTING ");
-			sprintf(s_lcd, "Ch: %3i", ConfStruct_local.dmx_addr + 1);
+//			LCDTransmitStr((const char *) " DEXEL LIGHTING ");
+//			sprintf(s_lcd, "Ch: %3i", ConfStruct_local.dmx_addr + 1);
+//			LCD_2DO_RENGLON;
+//			LCDTransmitStr(s_lcd);
+//			Lcd_SetDDRAM(0x40 + 7);
+//			LCDTransmitStr((const char *) "      % D");
+
+			LCDTransmitStr((const char *) "DEXEL LIGHTING C");
+			sprintf(s_lcd, "DMX:%03i", ConfStruct_local.dmx_addr + 1);
 			LCD_2DO_RENGLON;
 			LCDTransmitStr(s_lcd);
 			Lcd_SetDDRAM(0x40 + 7);
-			LCDTransmitStr((const char *) "      % D");
+			LCDTransmitStr((const char *) "      % 2");
+
 			dmx_state = DMX_CH2_1;
 			dmx_need_a_change = 1;
 			break;
